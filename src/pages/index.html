@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+.hero {
+    background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+    color: white;
+    padding: 5rem 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.hero-highlight {
+    color: var(--primary);
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: #BDBDBD;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.features {
+    padding: 4rem 0;
+    background-color: var(--surface);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: var(--secondary);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid var(--border);
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.product-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background: var(--surface);
+}
+
+.product-content {
+    padding: 1.5rem;
+}
+
+.product-category {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.product-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    color: var(--secondary);
+}
+
+.product-description {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+}
+
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.product-btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.cta-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: white;
+    text-align: center;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.cta-text {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.services {
+    padding: 4rem 0;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.service-item {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s ease;
+}
+
+.service-item:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateX(8px);
+}
+
+.service-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.service-description {
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1 class="hero-title">
+            Bem-vindo à <span class="hero-highlight">Automax</span>
+        </h1>
+        <p class="hero-subtitle">
+            Peças de qualidade e serviços especializados para o seu veículo. 
+            Soluções completas em manutenção automotiva.
+        </p>
+        <div class="hero-buttons">
+            <a href="/pecas" class="btn btn-primary">Ver Catálogo</a>
+            <a href="/servicos" class="btn btn-outline" style="color: white; border-color: white;">Nossos Serviços</a>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Produtos</h2>
+        <div class="products-grid">
+            <div class="product-card">
+                <img src="https://placehold.co/600x400" alt="Pastilha de Freio" class="product-image">
+                <div class="product-content">
+                    <span class="product-category">Freios</span>
+                    <h3 class="product-title">Pastilha de Freio Dianteira</h3>
+                    <p class="product-description">
+                        Alta performance e durabilidade. Compatível com diversos modelos.
+                    </p>
+                    <div class="product-footer">
+                        <span class="product-price">R$ 189,90</span>
+                        <a href="/produto/1" class="btn btn-primary product-btn">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
+                <div class="product-content">
+                    <span class="product-category">Filtros</span>
+                    <h3 class="product-title">Filtro de Óleo Premium</h3>
+                    <p class="product-description">
+                        Máxima proteção para o motor do seu veículo. Qualidade garantida.
+                    </p>
+                    <div class="product-footer">
+                        <span class="product-price">R$ 45,90</span>
+                        <a href="/produto/2" class="btn btn-primary product-btn">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
+                <div class="product-content">
+                    <span class="product-category">Filtros</span>
+                    <h3 class="product-title">Filtro de Óleo Premium</h3>
+                    <p class="product-description">
+                        Máxima proteção para o motor do seu veículo. Qualidade garantida.
+                    </p>
+                    <div class="product-footer">
+                        <span class="product-price">R$ 45,90</span>
+                        <a href="/produto/2" class="btn btn-primary product-btn">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
+                <div class="product-content">
+                    <span class="product-category">Filtros</span>
+                    <h3 class="product-title">Filtro de Óleo Premium</h3>
+                    <p class="product-description">
+                        Máxima proteção para o motor do seu veículo. Qualidade garantida.
+                    </p>
+                    <div class="product-footer">
+                        <span class="product-price">R$ 45,90</span>
+                        <a href="/produto/2" class="btn btn-primary product-btn">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="product-card">
+                <img src="https://placehold.co/600x400" alt="Amortecedor" class="product-image">
+                <div class="product-content">
+                    <span class="product-category">Suspensão</span>
+                    <h3 class="product-title">Kit Amortecedor Completo</h3>
+                    <p class="product-description">
+                        Conforto e estabilidade superior. Para todos os tipos de terreno.
+                    </p>
+                    <div class="product-footer">
+                        <span class="product-price">R$ 1.299,90</span>
+                        <a href="/produto/3" class="btn btn-primary product-btn">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://placehold.co/600x400" alt="Bateria" class="product-image">
+                <div class="product-content">
+                    <span class="product-category">Elétrica</span>
+                    <h3 class="product-title">Bateria 60Ah Selada</h3>
+                    <p class="product-description">
+                        Longa vida útil e alta performance. Livre de manutenção.
+                    </p>
+                    <div class="product-footer">
+                        <span class="product-price">R$ 389,90</span>
+                        <a href="/produto/4" class="btn btn-primary product-btn">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="services">
+    <div class="container">
+        <h2 class="section-title">Nossos Serviços</h2>
+        <div class="services-grid">
+            <div class="service-item">
+                <h3 class="service-name">Manutenção Preventiva</h3>
+                <p class="service-description">Revisões completas e troca de óleo</p>
+            </div>
+            <div class="service-item">
+                <h3 class="service-name">Suspensão e Freios</h3>
+                <p class="service-description">Reparo e substituição de componentes</p>
+            </div>
+            <div class="service-item">
+                <h3 class="service-name">Sistema Elétrico</h3>
+                <p class="service-description">Diagnóstico e reparos elétricos</p>
+            </div>
+            <div class="service-item">
+                <h3 class="service-name">Ar Condicionado</h3>
+                <p class="service-description">Manutenção e recarga de gás</p>
+            </div>
+            <div class="service-item">
+                <h3 class="service-name">Alinhamento e Balanceamento</h3>
+                <p class="service-description">Equipamentos de última geração</p>
+            </div>
+            <div class="service-item">
+                <h3 class="service-name">Diagnóstico Computadorizado</h3>
+                <p class="service-description">Identificação precisa de problemas</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Pronto para cuidar do seu veículo?</h2>
+        <p class="cta-text">
+            Agende seu horário ou solicite um orçamento sem compromisso
+        </p>
+        <div class="hero-buttons">
+            <a href="/orcamento" class="btn btn-secondary">Solicitar Orçamento</a>
+            <a href="/contato" class="btn btn-outline" style="color: white; border-color: white;">Fale Conosco</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

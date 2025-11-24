@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Automax - Auto Peças e Oficina{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/global.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <span class="logo-auto">AUTO</span><span class="logo-max">MAX</span>
+                </a>
+                
+                <nav class="nav">
+                    <a href="/" class="nav-link">Início</a>
+                    <a href="/pecas" class="nav-link">Peças</a>
+                    <a href="/servicos" class="nav-link">Serviços</a>
+                    <a href="/sobre" class="nav-link">Sobre</a>
+                    <a href="/contato" class="nav-link">Contato</a>
+                </nav>
+
+                <div class="header-actions">
+                    <a href="/login" class="btn btn-outline">Entrar</a>
+                    <a href="/cadastro" class="btn btn-primary">Cadastrar</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+            <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">Automax</h3>
+                    <p class="footer-text">Sua oficina e loja de auto peças de confiança há mais de 15 anos.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Links Rápidos</h4>
+                    <a href="/pecas" class="footer-link">Catálogo de Peças</a>
+                    <a href="/servicos" class="footer-link">Nossos Serviços</a>
+                    <a href="/orcamento" class="footer-link">Solicitar Orçamento</a>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Contato</h4>
+                    <p class="footer-text">Tel: (47) 3333-4444</p>
+                    <p class="footer-text">Email: contato@automax.com.br</p>
+                    <p class="footer-text">Rua das Peças, 123 - Joinville/SC</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-subtitle">Horário</h4>
+                    <p class="footer-text">Segunda a Sexta: 8h - 18h</p>
+                    <p class="footer-text">Sábado: 8h - 12h</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Automax. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
