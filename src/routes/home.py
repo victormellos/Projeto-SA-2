@@ -1,10 +1,9 @@
 from flask import render_template, request
-from app import app
+from app import app, get_db
+import bcrypt
 
 import sqlite3
 
-conn = sqlite3.connect('automax.db')
-cursor = conn.cursor()
 
 @app.route('/home')
 def home():
@@ -14,14 +13,42 @@ def home():
 def index():
     return render_template('index.html')
 
-@app.route('/login', methods =['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         log_nome = request.form.get("usuario")
         log_senha = request.form.get("senha")
-        print(f"nome: {log_nome}\nsenha: {log_senha}")
+
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT senha FROM funcionarios WHERE nome_funcionario=?", (log_nome,))
+        row = cursor.fetchone()
+
+        if row:
+            hash_senha = row[0]  
+            if bcrypt.checkpw(log_senha.encode('utf-8'), hash_senha):
+                conn.close()
+                return "Login feito com sucesso"
+            
+
+        cursor.execute("SELECT senha FROM clientes WHERE nome_cliente=?", (log_nome,))
+        row = cursor.fetchone()
+
+        if row:
+            hash_senha = row[0]  
+            if bcrypt.checkpw(log_senha.encode('utf-8'), hash_senha):
+                conn.close()
+                return "Login feito com sucesso"
+
+
+
+
+        conn.close()
+        return "Usuário ou senha incorretos"
 
     return render_template('login.html')
+
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
@@ -33,7 +60,12 @@ def cadastro():
         email = request.form.get("email")
         senha = request.form.get("senha")
 
-        
+
+        salt = bcrypt.gensalt()  # Gera um salt aleatório
+        senha_hash = bcrypt.hashpw(senha.encode('utf-8'), salt)
+
+        conn = get_db()
+        cursor = conn.cursor()
 
         tipo_usuario = request.form.get("tipo_usuario") 
 
@@ -48,7 +80,7 @@ def cadastro():
                 cursor.execute("""
                 INSERT INTO clientes (nome_cliente, CPF, celular, email, senha)
                 VALUES (?, ?, ?, ?, ?)
-                """, (nome, cpf, celular, email, senha))
+                """, (nome, cpf, celular, email, senha_hash))
 
                 cursor.execute("""
                 INSERT INTO veiculos (marca, cor, ano, modelo, placa)
@@ -57,14 +89,18 @@ def cadastro():
                 
                 conn.commit()
                 conn.close()
+                return "Cadastro do cliente feito com sucesso"
 
             case "funcionario":
                 cargo = request.form.get("cargo")
 
                 cursor.execute("""
-                INSERT INTO funcionarios (nome_funcionario, nivel_de_acesso)
-                VALUES (?, ?)
-                """, (nome, cargo))
+                INSERT INTO funcionarios (nome_funcionario, nivel_de_acesso, senha)
+                VALUES (?, ?, ?)
+                """, (nome, cargo, senha_hash))
+                conn.commit()
+                conn.close()
+                return "Cadastro do funcionario feito com sucesso"
                 
     return render_template('cadastro.html')
 

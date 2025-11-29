@@ -4,9 +4,10 @@ AVISO IMPORTANTE
 como muitos dados tem UNIQUE, quando você executar o db denovo vai ocorrer um erro de duplicata
 então sempre delete o arquivo se for mudar algo
 '''
+conn = sqlite3.connect(r'src\automax.db') 
+cursor = conn.cursor() 
 def init_database():
-    conn = sqlite3.connect('automax.db')
-    cursor = conn.cursor()
+    
     
     cursor.execute("PRAGMA foreign_keys = ON;") #Boa prática: usar FOREIGN KEY enforcement Por padrão, o SQLite não ativa chaves estrangeiras.
 
@@ -36,11 +37,12 @@ def init_database():
         CPF TEXT UNIQUE NOT NULL,
         celular TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        senha TEXT NOT NULL
+        senha BLOB NOT NULL
     );
     
     CREATE TABLE IF NOT EXISTS funcionarios (
         id_funcionario INTEGER PRIMARY KEY AUTOINCREMENT,
+        senha BLOB NOT NULL,
         nome_funcionario TEXT NOT NULL,
         nivel_de_acesso INTEGER NOT NULL
     );
@@ -108,33 +110,13 @@ def init_database():
     ''')
     
     conn.commit()
-    conn.close()
 
 def Inserir_dados():
-    conn = sqlite3.connect('automax.db')
-    cursor = conn.cursor()
-
     # Inserindo dados de veiculos
     veiculos = [
         ('Toyota', 'Preto', '2020', 'Corolla', 'ABC-1234'),
         ('Honda', 'Branco', '2021', 'Civic', 'XYZ-5678'),
-        ('Ford', 'Azul', '2019', 'Focus', 'DEF-1122'),
-        ('Chevrolet', 'Vermelho', '2022', 'Onix', 'JKL-3344'),
-        ('Fiat', 'Cinza', '2021', 'Argo', 'MNO-5566'),
-        ('Volkswagen', 'Branco', '2018', 'Gol', 'PQR-7788'),
-        ('Hyundai', 'Preto', '2022', 'HB20', 'STU-9900'),
-        ('Nissan', 'Azul', '2020', 'Versa', 'VWX-1234'),
-        ('Renault', 'Amarelo', '2021', 'Sandero', 'YZA-2345'),
-        ('Peugeot', 'Verde', '2020', '208', 'BCD-3456'),
-        ('Mercedes', 'Cinza', '2022', 'Classe A', 'EFG-4567'),
-        ('BMW', 'Preto', '2021', 'X1', 'HIJ-5678'),
-        ('Audi', 'Branco', '2019', 'A3', 'KLM-6789'),
-        ('Jeep', 'Vermelho', '2022', 'Compass', 'NOP-7890'),
-        ('Fiat', 'Laranja', '2019', 'Toro', 'QRS-8901'),
-        ('Toyota', 'Azul', '2021', 'Hilux', 'TUV-9012'),
-        ('Honda', 'Prata', '2020', 'HR-V', 'WXY-0123'),
-        ('Chevrolet', 'Preto', '2021', 'Tracker', 'ZAB-1234'),
-        ('Ford', 'Branco', '2020', 'Ecosport', 'CDE-2345')
+
     ]
     cursor.executemany(''' 
         INSERT INTO veiculos (marca, cor, ano, modelo, placa)
@@ -173,68 +155,16 @@ def Inserir_dados():
     clientes = [
         ('João Silva', '123.456.789-00', '123456789', 'joao@email.com', 'senha123'),
         ('Maria Oliveira', '987.654.321-00', '987654321', 'maria@email.com', 'senha456'),
-        ('Carlos Souza', '111.222.333-44', '112233445', 'carlos@email.com', 'senha789'),
-        ('Ana Costa', '555.444.333-22', '554433221', 'ana@email.com', 'senha101'),
-        ('Lucas Pereira', '444.555.666-77', '445566778', 'lucas@email.com', 'senha102'),
-        ('Fernanda Lima', '777.888.999-00', '778899001', 'fernanda@email.com', 'senha103'),
-        ('Gustavo Mendes', '333.444.555-66', '334455667', 'gustavo@email.com', 'senha104'),
-        ('Roberta Martins', '222.333.444-11', '223344556', 'roberta@email.com', 'senha105'),
-        ('Ricardo Almeida', '111.000.999-88', '110099880', 'ricardo@email.com', 'senha106'),
-        ('Patrícia Santos', '555.666.777-99', '556677889', 'patricia@email.com', 'senha107'),
-        ('Márcio Silva', '444.555.666-00', '445566778', 'marcio@email.com', 'senha108'),
-        ('Gabriela Costa', '333.444.555-11', '334455667', 'gabriela@email.com', 'senha109'),
-        ('Felipe Oliveira', '111.222.333-77', '112233445', 'felipe@email.com', 'senha110'),
-        ('Tatiane Rocha', '777.888.999-00', '778899001', 'tatiane@email.com', 'senha111'),
-        ('Juliana Santos', '555.444.333-88', '554433221', 'juliana@email.com', 'senha112'),
-        ('Marcos Dias', '444.333.222-11', '445566778', 'marcos@email.com', 'senha113'),
-        ('Camila Almeida', '333.222.111-44', '334455667', 'camila@email.com', 'senha114'),
-        ('Eduardo Silva', '111.000.999-77', '110099880', 'eduardo@email.com', 'senha115'),
-        ('Juliano Costa', '777.666.555-66', '778899001', 'juliano@email.com', 'senha116'),
-        ('Rafaela Lima', '555.444.333-99', '554433221', 'rafaela@email.com', 'senha117')
     ]
-
-    # Removendo duplicatas de CPF
-    seen_cpfs = set()
-    clientes_unicos = []
-    for cliente in clientes:
-        cpf = cliente[1]  # O CPF é o segundo elemento da tupla
-        if cpf not in seen_cpfs:
-            seen_cpfs.add(cpf)
-            clientes_unicos.append(cliente)
 
     # Inserindo clientes sem duplicatas
     cursor.executemany('''
         INSERT INTO clientes (nome_cliente, CPF, celular, email, senha)
         VALUES (?, ?, ?, ?, ?)
-    ''', clientes_unicos)
+    ''', clientes)
 
-    # Inserindo dados de funcionarios
-    funcionarios = [
-        ('José Pereira', 1),
-        ('Mariana Souza', 2),
-        ('Roberto Lima', 3),
-        ('Carla Oliveira', 1),
-        ('Carlos Costa', 2),
-        ('Luana Martins', 3),
-        ('Felipe Almeida', 1),
-        ('Sérgio Silva', 2),
-        ('Fernanda Dias', 3),
-        ('Ricardo Pereira', 1),
-        ('Ana Costa', 2),
-        ('Patrícia Silva', 3),
-        ('Marcos Almeida', 1),
-        ('Tatiane Costa', 2),
-        ('Gustavo Lima', 3),
-        ('Lucas Almeida', 1),
-        ('Juliana Silva', 2),
-        ('Rafaela Costa', 3),
-        ('Márcio Silva', 1),
-        ('Camila Costa', 2)
-    ]
-    cursor.executemany('''
-        INSERT INTO funcionarios (nome_funcionario, nivel_de_acesso)
-        VALUES (?, ?)
-    ''', funcionarios)
+    
+
 
     # Commit e fechamento da conexão
     conn.commit()
