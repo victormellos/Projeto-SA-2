@@ -4,7 +4,7 @@ AVISO IMPORTANTE
 como muitos dados tem UNIQUE, quando você executar o db denovo vai ocorrer um erro de duplicata
 então sempre delete o arquivo se for mudar algo
 '''
-conn = sqlite3.connect(r'src\automax.db') 
+conn = sqlite3.connect('automax.db')
 cursor = conn.cursor() 
 def init_database():
     
