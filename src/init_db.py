@@ -44,8 +44,8 @@ def init_database():
         id_funcionario INTEGER PRIMARY KEY AUTOINCREMENT,
         senha BLOB NOT NULL,
         nome_funcionario TEXT NOT NULL,
-        nivel_de_acesso INTEGER NOT NULL
-    );
+        nivel_de_acesso TEXT NOT NULL -- "gerente", "mecanico" ou "recepcionista"
+     );
     
     CREATE TABLE IF NOT EXISTS ordem (
         id_ordem INTEGER PRIMARY KEY AUTOINCREMENT,
