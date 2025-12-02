@@ -15,6 +15,7 @@ def home():
     return render_template('index.html', produtos=produtos, usuario_logado=usuario)
 
 
+@app.route("/")
 @app.route('/index')
 def index():
     return render_template('index.html')
