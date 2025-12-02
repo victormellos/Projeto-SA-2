@@ -24,8 +24,17 @@
                 </nav>
 
                 <div class="header-actions">
-                    <a href="/login" class="btn btn-outline">Entrar</a>
-                    <a href="/cadastro" class="btn btn-primary">Cadastrar</a>
+                    {% if usuario_logado %}
+                        {% if tipo_usuario == 'funcionario' %}
+                            <a href="/admin" class="btn btn-primary">Painel</a>
+                        {% elif tipo_usuario == 'cliente' %}
+                            <a href="/ordem-servico" class="btn btn-primary">Ordem de Serviço</a>
+                        {% endif %}
+                        <a href="/logout" class="btn btn-outline">Sair</a>
+                    {% else %}
+                        <a href="/login" class="btn btn-outline">Entrar</a>
+                        <a href="/cadastro" class="btn btn-primary">Cadastrar</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -36,7 +45,7 @@
     </main>
 
     <footer class="footer">
-            <div class="container">
+        <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
                     <h3 class="footer-title">Automax</h3>

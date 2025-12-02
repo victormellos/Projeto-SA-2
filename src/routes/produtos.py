@@ -5,13 +5,13 @@ from app import get_db
 
 DATABASE = 'automax.db'
 
-@app.route('/produtos/<int:id>')
+@app.route('/produto/<int:id>')
 def get_product(id):
     db = get_db()
     cursor = db.cursor()
 
     cursor.execute('''
-        SELECT id_produto, nome, preco, stock
+        SELECT id_produto, nome, preco, stock, detalhes, categoria
         FROM produtos
         WHERE id_produto = ?
     ''', (id,))  
@@ -25,7 +25,9 @@ def get_product(id):
         "id": produto[0],
         "nome": produto[1],
         "preco": produto[2],
-        "stock": produto[3]
+        "stock": produto[3],
+        "detalhes": produto[4],
+        "categoria": produto[5]
     }
 
-    return jsonify(produto_dict)
+    return render_template('produto_detalhe.html', produto=produto_dict)

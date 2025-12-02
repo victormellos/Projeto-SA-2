@@ -1,24 +1,27 @@
-from flask import render_template, request, redirect, session
+from flask import render_template, request, redirect, session, flash
 from app import app, get_db
 import bcrypt
+import sqlite3
 
 def home():
-    usuario = session.get("usuario")
-    if not usuario:
-        return redirect('/login')
+    return redirect('/')
 
-    conn = get_db()
-    produtos = conn.execute(
-        "SELECT id_produto, nome, preco, stock FROM produtos WHERE stock > 0 ORDER BY nome LIMIT 6"
-    ).fetchall()
-
-    return render_template('index.html', produtos=produtos, usuario_logado=usuario)
-
+def fetchProducts():
+    db = get_db()
+    cursor = db.cursor()
+    
+    cursor.execute("SELECT * FROM PRODUTOS ORDER BY preco ASC LIMIT 6")
+    results = cursor.fetchall()
+    
+    return results
 
 @app.route("/")
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    usuario = session.get("usuario")
+    tipo = session.get("tipo")
+    produtos = fetchProducts()
+    return render_template('index.html', usuario_logado=usuario, tipo_usuario=tipo, produtos=produtos)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -28,27 +31,27 @@ def login():
 
         conn = get_db()
         cursor = conn.cursor()
-        # funcionario
+        
         cursor.execute("SELECT senha, nivel_de_acesso FROM funcionarios WHERE nome_funcionario=?", (log_nome,))
         row = cursor.fetchone()
-        print(log_senha)
         
         if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[0]):
             session["usuario"] = log_nome
             session["tipo"] = "funcionario"
-            session["cargo"] = row[1] #nivel de acesso
-            print("SESSION ATUAL:", session)
-            return redirect('/home')
+            session["cargo"] = row[1]
+            flash('Login realizado com sucesso!', 'success')
+            return redirect('/login')
 
-        # ---- Cliente ----
         cursor.execute("SELECT senha FROM clientes WHERE nome_cliente=?", (log_nome,))
         row = cursor.fetchone()
         if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[0]):
             session["usuario"] = log_nome
             session["tipo"] = "cliente"
-            return redirect('/home')
+            flash('Login realizado com sucesso!', 'success')
+            return redirect('/login')
 
-        return "Usuário ou senha incorretos"
+        flash('Usuário ou senha incorretos', 'error')
+        return redirect('/login')
 
     return render_template('login.html')
 
@@ -90,15 +93,29 @@ def cadastro():
         email = request.form.get("email")
         senha = request.form.get("senha")
 
-        senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
-
         conn = get_db()
         cursor = conn.cursor()
 
-        tipo_usuario = request.form.get("tipo_usuario")
+        try:
+            cursor.execute("SELECT id_cliente FROM clientes WHERE CPF=?", (cpf,))
+            if cursor.fetchone():
+                flash('CPF já cadastrado no sistema!', 'error')
+                return redirect('/cadastro')
 
-        if tipo_usuario == "cliente":
+            cursor.execute("SELECT id_cliente FROM clientes WHERE email=?", (email,))
+            if cursor.fetchone():
+                flash('E-mail já cadastrado no sistema!', 'error')
+                return redirect('/cadastro')
+
             placa = request.form.get("placa")
+            if placa:
+                cursor.execute("SELECT id_veiculo FROM veiculos WHERE placa=?", (placa,))
+                if cursor.fetchone():
+                    flash('Placa já cadastrada no sistema!', 'error')
+                    return redirect('/cadastro')
+
+            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
+
             modelo = request.form.get("modelo")
             marca = request.form.get("marca")
             ano = request.form.get("ano")
@@ -109,25 +126,31 @@ def cadastro():
                 (nome, cpf, celular, email, senha_hash)
             )
 
-            cursor.execute(
-                "INSERT INTO veiculos (marca, cor, ano, modelo, placa) VALUES (?, ?, ?, ?, ?)",
-                (marca, cor, ano, modelo, placa)
-            )
+            if placa and modelo and marca:
+                cursor.execute(
+                    "INSERT INTO veiculos (marca, cor, ano, modelo, placa) VALUES (?, ?, ?, ?, ?)",
+                    (marca, cor, ano, modelo, placa)
+                )
 
             conn.commit()
-            return "Cadastro do cliente feito com sucesso"
+            flash('Cadastro realizado com sucesso!', 'success')
+            return redirect('/cadastro')
 
-        
-        if tipo_usuario == "funcionario":
-            cargo = request.form.get("cargo")
+        except sqlite3.IntegrityError as e:
+            conn.rollback()
+            if 'CPF' in str(e):
+                flash('CPF já cadastrado no sistema!', 'error')
+            elif 'email' in str(e):
+                flash('E-mail já cadastrado no sistema!', 'error')
+            elif 'placa' in str(e):
+                flash('Placa já cadastrada no sistema!', 'error')
+            else:
+                flash('Erro ao realizar cadastro. Verifique os dados informados.', 'error')
+            return redirect('/cadastro')
 
-            cursor.execute(
-                "INSERT INTO funcionarios (nome_funcionario, nivel_de_acesso, senha) VALUES (?, ?, ?)",
-                (nome, cargo, senha_hash)
-            )
-
-            conn.commit()
-            return "Cadastro do funcionário feito com sucesso"
+        except Exception as e:
+            conn.rollback()
+            flash('Erro ao realizar cadastro. Tente novamente.', 'error')
+            return redirect('/cadastro')
 
     return render_template('cadastro.html')
-

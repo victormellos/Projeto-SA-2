@@ -188,8 +188,16 @@
             Soluções completas em manutenção automotiva.
         </p>
         <div class="hero-buttons">
-            <a href="/pecas" class="btn btn-primary">Ver Catálogo</a>
-            <a href="/servicos" class="btn btn-outline" style="color: white; border-color: white;">Nossos Serviços</a>
+            {% if usuario_logado %}
+                {% if tipo_usuario == 'funcionario' %}
+                    <a href="/admin" class="btn btn-primary">Abrir Painel</a>
+                {% elif tipo_usuario == 'cliente' %}
+                    <a href="/ordem-servico" class="btn btn-primary">Pedir Ordem de Serviço</a>
+                {% endif %}
+            {% else %}
+                <a href="/login" class="btn btn-primary">Entrar</a>
+                <a href="/cadastro" class="btn btn-outline" style="color: white; border-color: white;">Cadastrar</a>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -198,97 +206,26 @@
     <div class="container">
         <h2 class="section-title">Produtos</h2>
         <div class="products-grid">
-            <div class="product-card">
-                <img src="https://placehold.co/600x400" alt="Pastilha de Freio" class="product-image">
-                <div class="product-content">
-                    <span class="product-category">Freios</span>
-                    <h3 class="product-title">Pastilha de Freio Dianteira</h3>
-                    <p class="product-description">
-                        Alta performance e durabilidade. Compatível com diversos modelos.
-                    </p>
-                    <div class="product-footer">
-                        <span class="product-price">R$ 189,90</span>
-                        <a href="/produto/1" class="btn btn-primary product-btn">Ver Detalhes</a>
-                    </div>
-                </div>
-            </div>
+
+            {% for i in range(0,6) %}
 
             <div class="product-card">
                 <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
                 <div class="product-content">
-                    <span class="product-category">Filtros</span>
-                    <h3 class="product-title">Filtro de Óleo Premium</h3>
+                    <span class="product-category">{{produtos[i].categoria}}</span>
+                    <h3 class="product-title">{{produtos[i].nome}}</h3>
                     <p class="product-description">
-                        Máxima proteção para o motor do seu veículo. Qualidade garantida.
+                        {{produtos[i].Detalhes}}
                     </p>
                     <div class="product-footer">
-                        <span class="product-price">R$ 45,90</span>
+                        <span class="product-price">R${{produtos[i].preco}}</span>
                         <a href="/produto/2" class="btn btn-primary product-btn">Ver Detalhes</a>
                     </div>
                 </div>
             </div>
 
-            <div class="product-card">
-                <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
-                <div class="product-content">
-                    <span class="product-category">Filtros</span>
-                    <h3 class="product-title">Filtro de Óleo Premium</h3>
-                    <p class="product-description">
-                        Máxima proteção para o motor do seu veículo. Qualidade garantida.
-                    </p>
-                    <div class="product-footer">
-                        <span class="product-price">R$ 45,90</span>
-                        <a href="/produto/2" class="btn btn-primary product-btn">Ver Detalhes</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
-                <div class="product-content">
-                    <span class="product-category">Filtros</span>
-                    <h3 class="product-title">Filtro de Óleo Premium</h3>
-                    <p class="product-description">
-                        Máxima proteção para o motor do seu veículo. Qualidade garantida.
-                    </p>
-                    <div class="product-footer">
-                        <span class="product-price">R$ 45,90</span>
-                        <a href="/produto/2" class="btn btn-primary product-btn">Ver Detalhes</a>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="product-card">
-                <img src="https://placehold.co/600x400" alt="Amortecedor" class="product-image">
-                <div class="product-content">
-                    <span class="product-category">Suspensão</span>
-                    <h3 class="product-title">Kit Amortecedor Completo</h3>
-                    <p class="product-description">
-                        Conforto e estabilidade superior. Para todos os tipos de terreno.
-                    </p>
-                    <div class="product-footer">
-                        <span class="product-price">R$ 1.299,90</span>
-                        <a href="/produto/3" class="btn btn-primary product-btn">Ver Detalhes</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <img src="https://placehold.co/600x400" alt="Bateria" class="product-image">
-                <div class="product-content">
-                    <span class="product-category">Elétrica</span>
-                    <h3 class="product-title">Bateria 60Ah Selada</h3>
-                    <p class="product-description">
-                        Longa vida útil e alta performance. Livre de manutenção.
-                    </p>
-                    <div class="product-footer">
-                        <span class="product-price">R$ 389,90</span>
-                        <a href="/produto/4" class="btn btn-primary product-btn">Ver Detalhes</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+            {% endfor %}
+        </div> 
     </div>
 </section>
 

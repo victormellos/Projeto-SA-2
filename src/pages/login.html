@@ -2,6 +2,82 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/auth.css') }}">
+<style>
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+    min-width: 300px;
+}
+
+.notification.success {
+    border-left: 4px solid #10B981;
+}
+
+.notification.error {
+    border-left: 4px solid #EF4444;
+}
+
+.notification-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
+
+.notification.success .notification-icon {
+    background: #10B981;
+}
+
+.notification.error .notification-icon {
+    background: #EF4444;
+}
+
+.notification-message {
+    flex: 1;
+    color: #1F2937;
+    font-weight: 500;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.notification.hide {
+    animation: slideOut 0.3s ease-out forwards;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -53,4 +129,40 @@
         </div>
     </div>
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="notification {{ category }}" id="notification">
+                <div class="notification-icon">
+                    {% if category == 'success' %}✓{% else %}!{% endif %}
+                </div>
+                <div class="notification-message">{{ message }}</div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notification = document.getElementById('notification');
+    if (notification) {
+        if (notification.classList.contains('success')) {
+            setTimeout(function() {
+                notification.classList.add('hide');
+                setTimeout(function() {
+                    window.location.href = '/';
+                }, 300);
+            }, 2000);
+        } else {
+            setTimeout(function() {
+                notification.classList.add('hide');
+                setTimeout(function() {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+    }
+});
+</script>
 {% endblock %}

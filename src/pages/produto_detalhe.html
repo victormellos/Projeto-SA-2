@@ -2,90 +2,130 @@
 
 {% block extra_css %}
 <style>
-    .produto-wrapper {
-        max-width: 1200px;
-        margin: 4rem auto;
-        display: grid;
-        grid-template-columns: 560px 1fr;
-        gap: 4rem;
-        align-items: start;
+
+    /* --- Layout geral --- */
+    body {
+        background: linear-gradient(135deg, #f5f5f5, #ebebeb);
     }
 
+    .produto-wrapper {
+        max-width: 1200px;
+        margin: 4.5rem auto;
+        display: grid;
+        grid-template-columns: 560px 1fr;
+        gap: 4.5rem;
+        align-items: start;
+        padding: 0 1.5rem;
+    }
+
+    /* --- Imagem do produto --- */
     .produto-imagem {
         width: 100%;
         aspect-ratio: 1;
         object-fit: cover;
-        border-radius: 16px;
-        box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+        border-radius: 18px;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+        transition: 0.3s ease;
+        background: #fff;
     }
 
-    .info h1 {
-        font-size: 2.9rem;
-        font-weight: 800;
-        color: var(--secondary);
-        margin: 0 0 1 1.2rem;
-        line-height: 1.2;
+    .produto-imagem:hover {
+        transform: scale(1.03);
+        box-shadow: 0 25px 60px rgba(0,0,0,0.22);
     }
 
+    /* --- Título e categoria --- */
     .categoria {
         display: inline-block;
         background: var(--primary);
         color: white;
-        padding: 0.5rem 1.4rem;
+        padding: 0.4rem 1.3rem;
         border-radius: 50px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: 600;
-        text-transform: uppercase;
         letter-spacing: 1px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    .preco {
-        font-size: 3.8rem;
+    .info h1 {
+        font-size: 3.1rem;
         font-weight: 800;
+        color: var(--secondary);
+        margin: 1.2rem 0 0.8rem;
+        line-height: 1.2;
+    }
+
+    /* --- Preço --- */
+    .preco {
+        font-size: 3.9rem;
+        font-weight: 900;
         color: var(--primary);
         margin: 2rem 0 1.5rem;
+        text-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .preco small {
-        font-size: 1.3rem;
+        margin-left: 0.3rem;
+        font-size: 1.2rem;
         color: var(--text-light);
         font-weight: 500;
     }
 
+    /* --- Descrição --- */
     .descricao {
-        font-size: 1.15rem;
-        line-height: 1.9;
+        font-size: 1.18rem;
+        line-height: 1.85;
         color: var(--text);
-        margin-bottom: 2.5rem;
+        margin-bottom: 2.8rem;
         text-align: justify;
     }
 
+    /* --- Botões --- */
     .btn-grande {
-        padding: 1.3rem 3.5rem;
-        font-size: 1.2rem;
-        font-weight: 600;
+        padding: 1.4rem 3.5rem;
+        font-size: 1.25rem;
+        font-weight: 700;
         width: 100%;
-        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transition: 0.3s ease;
     }
 
+    .btn-grande:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.22);
+    }
+
+    /* --- Cards de informação --- */
     .card-info {
-        background: var(--surface);
-        padding: 1.8rem;
-        border-radius: 12px;
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(14px);
+        padding: 2rem;
+        border-radius: 14px;
         border: 1px solid var(--border);
-        margin-bottom: 1.5rem 0;
+        margin-bottom: 1.8rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: 0.25s ease;
+    }
+
+    .card-info:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 35px rgba(0,0,0,0.12);
     }
 
     .card-info h3 {
         color: var(--secondary);
         margin-bottom: 1rem;
-        font-size: 1.25rem;
+        font-size: 1.3rem;
         border-bottom: 2px solid var(--primary);
-        padding-bottom: 0.5rem;
+        padding-bottom: 0.4rem;
+        font-weight: 700;
     }
 
     .card-info p {
-        margin: 0.8rem 0;
+        margin: 0.7rem 0;
+        font-size: 1.05rem;
         color: var(--text);
         display: flex;
         justify-content: space-between;
@@ -93,16 +133,38 @@
 
     .card-info strong {
         color: var(--secondary);
+        font-weight: 700;
     }
 
+    /* --- Botão WhatsApp --- */
+    .btn-outline {
+        border: 2px solid var(--primary);
+        border-radius: 12px;
+        font-weight: 700 !important;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        transition: 0.3s ease;
+    }
+
+    .btn-outline:hover {
+        background: var(--primary);
+        color: white;
+        transform: scale(1.02);
+    }
+
+    /* --- Produtos relacionados --- */
     .produtos-relacionados {
-        margin-top: 4rem;
+        margin-top: 6rem;
+        padding: 3rem 1rem;
+        background: linear-gradient(135deg, #ffffff, #f4f4f4);
+        border-radius: 18px;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.1);
     }
 
     .produtos-relacionados h2 {
-        font-size: 2rem;
+        font-size: 2.2rem;
+        font-weight: 800;
         color: var(--secondary);
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         text-align: center;
     }
 
@@ -112,15 +174,39 @@
         gap: 2rem;
     }
 
+    .product-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        transition: 0.25s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    }
+
+    .product-card img {
+        border-radius: 12px;
+        transition: 0.3s ease;
+    }
+
+    .product-card:hover img {
+        transform: scale(1.03);
+    }
+
     @media (max-width: 992px) {
         .produto-wrapper {
             grid-template-columns: 1fr;
         }
-        .info h1 { font-size: 2.5rem; }
-        .preco { font-size: 3.2rem; }
+        .info h1 { font-size: 2.4rem; }
+        .preco { font-size: 3rem; }
     }
+
 </style>
 {% endblock %}
+
 
 {% block content %}
 <div class="container">
@@ -133,27 +219,24 @@
                  class="produto-imagem">
         </div>
 
-        <!-- Informações + Conteúdo extra -->
         <div class="info">
-            <span class="categoria">Freios</span>
-            <h1>Pastilha de Freio Dianteira Cerâmica</h1>
+            <span class="categoria">{{produto["categoria"]}}</span>
+            <h1>{{produto["nome"]}}</h1>
 
             <div class="preco">
-                R$ 189,90
+                R$ {{produto["preco"]}}
                 <small>à vista no PIX ou boleto</small>
             </div>
 
             <p class="descricao">
-                Pastilhas de cerâmica de alta performance com tecnologia anti-ruído. 
-                Excelente poder de frenagem em qualquer condição, maior vida útil e praticamente zero poeira nas rodas. 
-                Produto original ou similar de primeira linha, com garantia de 6 meses.
+                {{produto["detalhes"]}}
             </p>
 
             <a href="/contato" class="btn btn-primary btn-grande">
                 Solicitar Orçamento
             </a>
 
-            <!-- Caixa de informações técnicas -->
+
             <div class="card-info">
                 <h3>Informações Técnicas</h3>
                 <p><strong>Código:</strong> <span>PT-00189</span></p>
