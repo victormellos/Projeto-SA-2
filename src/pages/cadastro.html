@@ -13,15 +13,6 @@
         </div>
 
         <form class="auth-form" method="POST" action="/cadastro">
-            <div class="form-group">
-                <label for="tipo_usuario" class="form-label">Tipo de Usuário</label>
-                <select id="tipo_usuario" name="tipo_usuario" class="form-input" required>
-                    <option value="">Selecione o tipo de usuário</option>
-                    <option value="cliente">Cliente</option>
-                    <option value="funcionario">Funcionário</option>
-                </select>
-            </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label for="nome" class="form-label">Nome Completo</label>
@@ -104,7 +95,7 @@
                 </div>
             </div>
 
-            <div id="campos-cliente" class="campos-condicionais" style="display: none;">
+            <div id="campos-cliente" class="campos-condicionais">
                 <div class="divider">
                     <span>Dados do Veículo</span>
                 </div>
@@ -171,45 +162,8 @@
                 </div>
             </div>
 
-            <div id="campos-funcionario" class="campos-condicionais" style="display: none;">
-                <div class="divider">
-                    <span>Informações do Funcionário</span>
-                </div>
-
-                <div class="form-group">
-                    <label for="modelo" class="form-label">Nome</label>
-                    <input 
-                        type="text" 
-                        id="nome-funcionario" 
-                        name="nome-funcionario" 
-                        class="form-input" 
-                        placeholder="Pedro"
-                    >
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="cargo" class="form-label">Cargo</label>
-                        <select id="cargo" name="cargo" class="form-input">
-                            <option value="">Selecione o cargo</option>
-                            <option value="gerente">Gerente</option>
-                            <option value="mecanico">Mecânico</option>
-                            <option value="recepcionista">Recepcionista</option>
-                        </select>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="termos" required>
-                    <span>Aceito os <a href="/termos" class="link-primary">termos de uso</a> e <a href="/privacidade" class="link-primary">política de privacidade</a></span>
-                </label>
-            </div>
-
             <button type="submit" class="btn btn-primary btn-full">Criar Conta</button>
-        </form>
+      
 
         <div class="auth-footer">
             <p>Já possui uma conta? <a href="/login" class="link-primary">Faça login</a></p>
@@ -218,28 +172,6 @@
 </div>
 
 <script>
-document.getElementById('tipo_usuario').addEventListener('change', function() {
-    const camposCliente = document.getElementById('campos-cliente');
-    const camposFuncionario = document.getElementById('campos-funcionario');
-    const cargo = document.getElementById('cargo');
-    const nivelAcesso = document.getElementById('nivel_acesso');
-    
-    if (this.value === 'cliente') {
-        camposCliente.style.display = 'block';
-        camposFuncionario.style.display = 'none';
-        cargo.required = false;
-        nivelAcesso.required = false;
-    } else if (this.value === 'funcionario') {
-        camposCliente.style.display = 'none';
-        camposFuncionario.style.display = 'block';
-        cargo.required = true;
-        nivelAcesso.required = true;
-    } else {
-        camposCliente.style.display = 'none';
-        camposFuncionario.style.display = 'none';
-    }
-});
-
 document.getElementById('cpf').addEventListener('input', function(e) {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length <= 11) {
