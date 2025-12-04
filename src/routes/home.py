@@ -165,9 +165,12 @@ def pedir():
     
     id_cliente = session.get("id_cliente")
 
-    cursor.execute("SELECT * FROM CLIENTES WHERE id_cliente = ?" (id_cliente))    
+    cursor.execute("SELECT * FROM CLIENTES WHERE id_cliente = ?", (id_cliente,))    
     cliente = cursor.fetchone()
-    return render_template('pedir.html', cliente=cliente)
+    cursor.execute("SELECT id_veiculo FROM veiculos WHERE id_cliente = ?", (id_cliente,))
+    veiculo = cursor.fetchone()
+    print(cliente)
+    return render_template('pedir.html', cliente=cliente, veiculo=veiculo)
 
 @app.route("/pedir/troca-pecas", methods=["POST"])
 def troca_pecas():

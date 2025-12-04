@@ -13,7 +13,9 @@ def init_database():
         cor TEXT NOT NULL,
         ano TEXT NOT NULL,
         modelo TEXT NOT NULL,
-        placa TEXT UNIQUE NOT NULL
+        placa TEXT UNIQUE NOT NULL,
+        id_cliente INTEGER,
+        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS produtos (
@@ -52,6 +54,7 @@ def init_database():
         abertura TEXT,
         prazo TEXT,
         fechamento TEXT,
+        conclusao_ordem TEXT,
         mao_de_obra REAL,
         orcamento REAL,
         FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE,
