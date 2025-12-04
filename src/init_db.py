@@ -52,7 +52,6 @@ def init_database():
         abertura TEXT,
         prazo TEXT,
         fechamento TEXT,
-        conclusao_ordem TEXT,
         mao_de_obra REAL,
         orcamento REAL,
         FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE,

@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Serviço - Automax{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pedir-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 3rem 0;
+        text-align: center;
+    }
+
+    .pedir-hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .pedir-hero p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 0 20px;
+    }
+
+    .service-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .tab-button {
+        flex: 1;
+        min-width: 200px;
+        padding: 1.2rem;
+        border: 2px solid var(--border);
+        background-color: var(--surface);
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .tab-button:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .tab-button.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .form-section {
+        display: none;
+        background-color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border);
+    }
+
+    .form-section.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-section h2 {
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .form-group label .required {
+        color: var(--error);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-info {
+        background-color: var(--surface);
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 4px solid var(--primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .pedir-hero h1 {
+            font-size: 2rem;
+        }
+
+        .service-tabs {
+            flex-direction: column;
+        }
+
+        .tab-button {
+            min-width: 100%;
+        }
+
+        .form-section {
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="pedir-hero">
+    <div class="container">
+        <h1>Solicitar Serviço</h1>
+        <p>Escolha o tipo de serviço que você precisa e preencha o formulário</p>
+    </div>
+</section>
+
+<div class="form-container">
+    <div class="service-tabs">
+        <button class="tab-button active" onclick="showForm('troca-pecas')">
+        Troca de Peças
+        </button>
+        <button class="tab-button" onclick="showForm('emergencial')">
+            Serviço Emergencial
+        </button>
+        <button class="tab-button" onclick="showForm('agendamento')">
+            Agendamento
+        </button>
+    </div>
+
+    <!-- Formulário: Troca de Peças -->
+    <div id="troca-pecas" class="form-section active">
+        <h2>Troca de Peças</h2>
+        <div class="form-info">
+            <p>Solicite a instalação de peças em seu veículo. Nossa equipe entrará em contato para confirmar disponibilidade e agendar o serviço.</p>
+        </div>
+        <form method="POST" action="/pedir/troca-pecas">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome Completo <span class="required">*</span></label>
+                    <input type="text" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone <span class="required">*</span></label>
+                    <input type="tel" name="telefone" placeholder="(47) 99999-9999" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Marca do Veículo <span class="required">*</span></label>
+                    <input type="text" name="marca" placeholder="Ex: Fiat, Volkswagen" required>
+                </div>
+                <div class="form-group">
+                    <label>Modelo <span class="required">*</span></label>
+                    <input type="text" name="modelo" placeholder="Ex: Uno, Gol" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ano <span class="required">*</span></label>
+                    <input type="number" name="ano" placeholder="2020" min="1950" max="2025" required>
+                </div>
+                <div class="form-group">
+                    <label>Placa</label>
+                    <input type="text" name="placa" placeholder="ABC-1234">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Peças Necessárias <span class="required">*</span></label>
+                <textarea name="pecas" placeholder="Liste as peças que você precisa instalar (ex: Pastilhas de freio, óleo, filtro...)" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição do Serviço <span class="required">*</span></label>
+                <textarea name="descricao" placeholder="Descreva detalhadamente o serviço que você precisa" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Observações Adicionais</label>
+                <textarea name="observacoes" placeholder="Alguma informação adicional que possamos saber?"></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Enviar Solicitação</button>
+        </form>
+    </div>
+
+    <!-- Formulário: Serviço Emergencial -->
+    <div id="emergencial" class="form-section">
+        <h2>Serviço Emergencial</h2>
+        <div class="form-info">
+            <p>Para situações urgentes. Nossa equipe priorizará seu atendimento e entrará em contato o mais rápido possível.</p>
+        </div>
+        <form method="POST" action="/pedir/emergencial">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome Completo <span class="required">*</span></label>
+                    <input type="text" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone <span class="required">*</span></label>
+                    <input type="tel" name="telefone" placeholder="(47) 99999-9999" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Marca do Veículo <span class="required">*</span></label>
+                    <input type="text" name="marca" placeholder="Ex: Fiat, Volkswagen" required>
+                </div>
+                <div class="form-group">
+                    <label>Modelo <span class="required">*</span></label>
+                    <input type="text" name="modelo" placeholder="Ex: Uno, Gol" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ano <span class="required">*</span></label>
+                    <input type="number" name="ano" placeholder="2020" min="1950" max="2025" required>
+                </div>
+                <div class="form-group">
+                    <label>Placa</label>
+                    <input type="text" name="placa" placeholder="ABC-1234">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nível de Urgência <span class="required">*</span></label>
+                <select name="urgencia" required>
+                    <option value="">Selecione...</option>
+                    <option value="critica">Crítica - Veículo parado/perigoso</option>
+                    <option value="alta">Alta - Preciso usar hoje</option>
+                    <option value="media">Média - Preciso nos próximos dias</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Localização Atual <span class="required">*</span></label>
+                <input type="text" name="localizacao" placeholder="Onde seu veículo está localizado?" required>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição do Problema <span class="required">*</span></label>
+                <textarea name="problema" placeholder="Descreva detalhadamente o problema que está enfrentando" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>O veículo está em condições de ser dirigido até a oficina?</label>
+                <select name="pode_dirigir" required>
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não - Preciso de guincho</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Observações Adicionais</label>
+                <textarea name="observacoes" placeholder="Alguma informação adicional que possamos saber?"></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Enviar Solicitação Emergencial</button>
+        </form>
+    </div>
+
+    <!-- Formulário: Agendamento -->
+    <div id="agendamento" class="form-section">
+        <h2>Agendamento de Serviço</h2>
+        <div class="form-info">
+            <p>Agende seu serviço com antecedência. Escolha a melhor data e horário para você.</p>
+        </div>
+        <form method="POST" action="/pedir/agendamento">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome Completo <span class="required">*</span></label>
+                    <input type="text" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone <span class="required">*</span></label>
+                    <input type="tel" name="telefone" placeholder="(47) 99999-9999" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Marca do Veículo <span class="required">*</span></label>
+                    <input type="text" name="marca" placeholder="Ex: Fiat, Volkswagen" required>
+                </div>
+                <div class="form-group">
+                    <label>Modelo <span class="required">*</span></label>
+                    <input type="text" name="modelo" placeholder="Ex: Uno, Gol" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ano <span class="required">*</span></label>
+                    <input type="number" name="ano" placeholder="2020" min="1950" max="2025" required>
+                </div>
+                <div class="form-group">
+                    <label>Placa</label>
+                    <input type="text" name="placa" placeholder="ABC-1234">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Tipo de Serviço <span class="required">*</span></label>
+                <select name="tipo_servico" required>
+                    <option value="">Selecione...</option>
+                    <option value="revisao">Revisão</option>
+                    <option value="manutencao">Manutenção Preventiva</option>
+                    <option value="troca-oleo">Troca de Óleo</option>
+                    <option value="freios">Freios</option>
+                    <option value="suspensao">Suspensão</option>
+                    <option value="eletrica">Elétrica</option>
+                    <option value="ar-condicionado">Ar Condicionado</option>
+                    <option value="alinhamento">Alinhamento e Balanceamento</option>
+                    <option value="outros">Outros</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Data Preferencial <span class="required">*</span></label>
+                    <input type="date" name="data" required>
+                </div>
+                <div class="form-group">
+                    <label>Horário Preferencial <span class="required">*</span></label>
+                    <select name="horario" required>
+                        <option value="">Selecione...</option>
+                        <option value="08:00">08:00</option>
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="13:00">13:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição do Serviço <span class="required">*</span></label>
+                <textarea name="descricao" placeholder="Descreva o serviço que você precisa realizar" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Observações Adicionais</label>
+                <textarea name="observacoes" placeholder="Alguma preferência ou informação adicional?"></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Agendar Serviço</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function showForm(formId) {
+    // Esconde todos os formulários
+    const forms = document.querySelectorAll('.form-section');
+    forms.forEach(form => form.classList.remove('active'));
+    
+    // Remove a classe active de todos os botões
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(button => button.classList.remove('active'));
+    
+    // Mostra o formulário selecionado
+    document.getElementById(formId).classList.add('active');
+    
+    // Adiciona a classe active no botão clicado
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

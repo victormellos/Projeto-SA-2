@@ -32,13 +32,13 @@ def login():
         conn = get_db()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT senha, nivel_de_acesso FROM funcionarios WHERE nome_funcionario=?", (log_nome,))
+        cursor.execute("SELECT id_cliente, senha FROM clientes WHERE nome_cliente=?", (log_nome,))
         row = cursor.fetchone()
-        
-        if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[0]):
+
+        if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[1]):
             session["usuario"] = log_nome
-            session["tipo"] = "funcionario"
-            session["cargo"] = row[1]
+            session["tipo"] = "cliente"
+            session["id_cliente"] = row[0] # id
             flash('Login realizado com sucesso!', 'success')
             return redirect('/login')
 
@@ -154,3 +154,109 @@ def cadastro():
             return redirect('/cadastro')
 
     return render_template('cadastro.html')
+
+@app.route('/pedir', methods=['GET', 'POST'])
+def pedir():
+    if not session:
+        return render_template('login.html')
+
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    id_cliente = session.get("id_cliente")
+
+    cursor.execute("SELECT * FROM CLIENTES WHERE id_cliente = ?" (id_cliente))    
+    cliente = cursor.fetchone()
+    return render_template('pedir.html', cliente=cliente)
+
+@app.route("/pedir/troca-pecas", methods=["POST"])
+def troca_pecas():
+
+    nome = request.form.get("nome")
+    telefone = request.form.get("telefone")
+    email = request.form.get("email")
+    marca = request.form.get("marca")
+    modelo = request.form.get("modelo")
+    ano = request.form.get("ano")
+    placa = request.form.get("placa")
+    pecas = request.form.get("pecas")
+    descricao = request.form.get("descricao")
+    observacoes = request.form.get("observacoes")
+
+    print("\n📦 TROCA DE PEÇAS RECEBIDO:")
+    print("Nome:", nome)
+    print("Telefone:", telefone)
+    print("Email:", email)
+    print("Marca:", marca)
+    print("Modelo:", modelo)
+    print("Ano:", ano)
+    print("Placa:", placa)
+    print("Peças:", pecas)
+    print("Descrição:", descricao)
+    print("Observações:", observacoes)
+
+    return "Recebido (Troca de Peças)"
+
+@app.route("/pedir/emergencial", methods=["POST"])
+def emergencial():
+
+    nome = request.form.get("nome")
+    telefone = request.form.get("telefone")
+    email = request.form.get("email")
+    marca = request.form.get("marca")
+    modelo = request.form.get("modelo")
+    ano = request.form.get("ano")
+    placa = request.form.get("placa")
+    urgencia = request.form.get("urgencia")
+    localizacao = request.form.get("localizacao")
+    problema = request.form.get("problema")
+    pode_dirigir = request.form.get("pode_dirigir")
+    observacoes = request.form.get("observacoes")
+
+    print("\n🚨 EMERGENCIAL RECEBIDO:")
+    print("Nome:", nome)
+    print("Telefone:", telefone)
+    print("Email:", email)
+    print("Marca:", marca)
+    print("Modelo:", modelo)
+    print("Ano:", ano)
+    print("Placa:", placa)
+    print("Urgência:", urgencia)
+    print("Localização:", localizacao)
+    print("Problema:", problema)
+    print("Pode dirigir:", pode_dirigir)
+    print("Observações:", observacoes)
+
+    return "Recebido (Emergencial)"
+
+@app.route("/pedir/agendamento", methods=["POST"])
+def agendamento():
+
+    nome = request.form.get("nome")
+    telefone = request.form.get("telefone")
+    email = request.form.get("email")
+    marca = request.form.get("marca")
+    modelo = request.form.get("modelo")
+    ano = request.form.get("ano")
+    placa = request.form.get("placa")
+    tipo_servico = request.form.get("tipo_servico")
+    data = request.form.get("data")
+    horario = request.form.get("horario")
+    descricao = request.form.get("descricao")
+    observacoes = request.form.get("observacoes")
+
+    print("\n📅 AGENDAMENTO RECEBIDO:")
+    print("Nome:", nome)
+    print("Telefone:", telefone)
+    print("Email:", email)
+    print("Marca:", marca)
+    print("Modelo:", modelo)
+    print("Ano:", ano)
+    print("Placa:", placa)
+    print("Tipo de serviço:", tipo_servico)
+    print("Data:", data)
+    print("Horário:", horario)
+    print("Descrição:", descricao)
+    print("Observações:", observacoes)
+
+    return "Recebido (Agendamento)"
