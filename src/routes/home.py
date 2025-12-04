@@ -96,6 +96,7 @@ def cadastro():
         conn = get_db()
         cursor = conn.cursor()
 
+
         try:
             cursor.execute("SELECT id_cliente FROM clientes WHERE CPF=?", (cpf,))
             if cursor.fetchone():
@@ -120,16 +121,17 @@ def cadastro():
             marca = request.form.get("marca")
             ano = request.form.get("ano")
             cor = request.form.get("cor")
-
             cursor.execute(
                 "INSERT INTO clientes (nome_cliente, CPF, celular, email, senha) VALUES (?, ?, ?, ?, ?)",
                 (nome, cpf, celular, email, senha_hash)
             )
 
+            id_cliente = cursor.lastrowid
+
             if placa and modelo and marca:
                 cursor.execute(
-                    "INSERT INTO veiculos (marca, cor, ano, modelo, placa) VALUES (?, ?, ?, ?, ?)",
-                    (marca, cor, ano, modelo, placa)
+                    "INSERT INTO veiculos (marca, cor, ano, modelo, placa, id_cliente) VALUES (?, ?, ?, ?, ?, ?)",
+                    (marca, cor, ano, modelo, placa, id_cliente)
                 )
 
             conn.commit()
