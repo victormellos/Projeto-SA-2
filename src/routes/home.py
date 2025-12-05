@@ -19,6 +19,7 @@ def fetchProducts():
 
 @app.route("/")
 @app.route('/index')
+@app.route('/home')
 def index():
     usuario = session.get("usuario")
     tipo = session.get("tipo")
@@ -28,27 +29,20 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        log_nome = request.form.get("usuario")
+        log_email = request.form.get("email")
         log_senha = request.form.get("senha")
 
         conn = get_db()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT id_cliente, senha FROM clientes WHERE nome_cliente=?", (log_nome,))
+        cursor.execute("SELECT id_cliente, senha FROM clientes WHERE email=?", (log_email,))
         row = cursor.fetchone()
 
         if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[1]):
-            session["usuario"] = log_nome
+            cursor.execute("SELECT nome_cliente FROM clientes WHERE email=?", (log_email,))
+            session["usuario"] = cursor.fetchone()[0]
             session["tipo"] = "cliente"
             session["id_cliente"] = row[0] # id
-            flash('Login realizado com sucesso!', 'success')
-            return redirect('/login')
-
-        cursor.execute("SELECT senha FROM clientes WHERE nome_cliente=?", (log_nome,))
-        row = cursor.fetchone()
-        if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[0]):
-            session["usuario"] = log_nome
-            session["tipo"] = "cliente"
             flash('Login realizado com sucesso!', 'success')
             return redirect('/login')
 
@@ -65,6 +59,8 @@ def logout():
 @app.route('/admin')
 def admin():
     if session.get("tipo") != "funcionario":
+        if session.get("tipo") == "cliente":
+            return redirect('/')
         return redirect('/login')
 
     usuario = session.get("usuario")
@@ -99,17 +95,24 @@ def dashboard():
     
     # Buscar estatísticas do dashboard
     try:
+        # Contagem de ordens de serviço abertas
         cursor.execute("SELECT COUNT(*) FROM ordens_servico WHERE status IN ('Em andamento', 'Aguardando peças')")
-        ordens_abertas = cursor.fetchone()[0] if cursor.fetchone() else 24
-        
+        ordens_abertas = cursor.fetchone()[0] 
+        if not ordens_abertas:
+            ordens_abertas = 24
+
         # Produtos com baixo estoque (menos de 10 unidades)
         cursor.execute("SELECT COUNT(*) FROM produtos WHERE stock < 10")
-        produtos_baixo_estoque = cursor.fetchone()[0] if cursor.fetchone() else 7
-        
+        produtos_baixo_estoque = cursor.fetchone()[0]
+        if not produtos_baixo_estoque:
+            produtos_baixo_estoque = 7
+
         # O total de clientes ativos
         cursor.execute("SELECT COUNT(*) FROM clientes")
-        clientes_ativos = cursor.fetchone()[0] if cursor.fetchone() else 152
-    
+        clientes_ativos = cursor.fetchone()[0]
+        if not clientes_ativos:
+            clientes_ativos = 152
+
         cursor.execute("""
             SELECT o.id_ordem, c.nome_cliente, v.modelo, v.placa, o.status 
             FROM ordens_servico o
@@ -184,9 +187,10 @@ def cadastro():
                 if cursor.fetchone():
                     flash('Placa já cadastrada no sistema!', 'error')
                     return redirect('/cadastro')
-
-            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
-
+            salt = bcrypt.gensalt()
+            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), )
+            senhaasdasdasd = "admin123"
+            print(bcrypt.hashpw(), )
             modelo = request.form.get("modelo")
             marca = request.form.get("marca")
             ano = request.form.get("ano")
