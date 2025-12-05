@@ -208,7 +208,7 @@ def troca_pecas():
         abertura
     ))
     conn.commit()
-    return "Recebido (Troca de Peças)"
+    return render_template("confirma.html")
 
 
 @app.route("/pedir/emergencial", methods=["POST"])
@@ -242,7 +242,7 @@ def emergencial():
         abertura
     ))
     conn.commit()
-    return "Recebido (Emergencial)"
+    return render_template("confirma.html")
 
 
 @app.route("/pedir/agendamento", methods=["POST"])
@@ -276,4 +276,4 @@ def agendamento():
         abertura
     ))
     conn.commit()
-    return "Recebido (Agendamento)"
+    return render_template("confirma.html")
