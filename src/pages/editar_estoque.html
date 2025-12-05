@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Produto - Automax</title>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/dashboard" class="logo">
+                <span class="logo-auto">Auto</span><span class="logo-max">Max</span>
+            </a>
+            <div class="header-actions">
+                <a href="/admin/estoque" class="btn btn-outline">← Voltar</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="form-card">
+            <h1>Editar Produto</h1>
+            <p class="subtitle">Atualize as informações do produto</p>
+
+            <form method="POST" class="edit-form">
+                {% if nivel_acesso == '3' %}
+                <div class="form-group">
+                    <label>Nome do Produto</label>
+                    <input type="text" name="nome" value="{{ produto[1] }}" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preço (R$)</label>
+                        <input type="number" name="preco" step="0.01" value="{{ produto[2] }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <input type="text" name="categoria" value="{{ produto[5] }}" required>
+                    </div>
+                </div>
+                {% else %}
+                <div class="info-box">
+                    <strong>{{ produto[1] }}</strong>
+                    <p style="margin-top: 0.5rem; color: var(--text-light); font-size: 0.9rem;">
+                        Preço: R$ {{ "%.2f"|format(produto[2]) }} | Categoria: {{ produto[5] }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label>Quantidade em Estoque</label>
+                    <input type="number" name="stock" value="{{ produto[3] }}" required min="0">
+                    <div class="stock-indicator">
+                        {% if produto[3] < 5 %}
+                        <span class="badge badge-error">Estoque Crítico</span>
+                        {% elif produto[3] < 10 %}
+                        <span class="badge badge-warning">Estoque Baixo</span>
+                        {% else %}
+                        <span class="badge badge-success">Estoque Normal</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if nivel_acesso != '3' %}
+                <div class="alert-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Como mecânico, você pode atualizar apenas a quantidade em estoque.</span>
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <a href="/admin/estoque" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        :root {
+            --primary: #D32F2F;
+            --primary-dark: #B71C1C;
+            --secondary: #1A1A1A;
+            --background: #FFFFFF;
+            --surface: #F5F5F5;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        .header {
+            background-color: var(--background);
+            border-bottom: 2px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .logo-auto {
+            color: var(--secondary);
+        }
+
+        .logo-max {
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--surface);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-card h1 {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .info-box {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+        }
+
+        .alert-box {
+            background: rgba(255, 152, 0, 0.1);
+            border: 2px solid var(--warning);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text);
+        }
+
+        .alert-box svg {
+            color: var(--warning);
+            flex-shrink: 0;
+        }
+
+        .stock-indicator {
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-error {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

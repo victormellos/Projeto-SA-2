@@ -190,7 +190,7 @@
         <div class="hero-buttons">
             {% if usuario_logado %}
                 {% if tipo_usuario == 'funcionario' %}
-                    <a href="/admin" class="btn btn-primary">Abrir Painel</a>
+                    <a href="/dashboard" class="btn btn-primary">Abrir Painel</a>
                 {% elif tipo_usuario == 'cliente' %}
                     <a href="/pedir" class="btn btn-primary">Pedir Ordem de Serviço</a>
                 {% endif %}
@@ -209,7 +209,7 @@
 
             {% for i in range(0,6) %}
 
-            <div class="product-card">
+            <div class="product-card">  
                 <img src="{{produtos[i].imagem}}" alt="Filtro de Óleo" class="product-image">
                 <div class="product-content">
                     <span class="product-category">{{produtos[i].categoria}}</span>

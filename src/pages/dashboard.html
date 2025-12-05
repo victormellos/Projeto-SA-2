@@ -1,4 +1,3 @@
-<!--dashboard.html-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -37,7 +36,6 @@
             line-height: 1.6;
         }
 
-        /* Header - Seguindo estilo do global.css */
         .header {
             background-color: var(--background);
             border-bottom: 2px solid var(--border);
@@ -125,14 +123,12 @@
             box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
         }
 
-        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -194,26 +190,6 @@
             color: var(--text-light);
         }
 
-        .stat-trend {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-
-        .stat-trend.up {
-            background: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-        }
-
-        .stat-trend.down {
-            background: rgba(244, 67, 54, 0.1);
-            color: var(--error);
-        }
-
-        /* Charts Section */
         .charts-section {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -244,32 +220,10 @@
             color: var(--secondary);
         }
 
-        .chart-filter {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: var(--text);
-            cursor: pointer;
-            background: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .chart-filter:hover {
-            border-color: var(--primary);
-        }
-
-        .chart-filter:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
         #revenueChart {
             max-height: 300px;
         }
 
-        /* Recent Activity */
         .activity-list {
             list-style: none;
         }
@@ -311,7 +265,6 @@
             white-space: nowrap;
         }
 
-        /* Tables Section */
         .tables-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -442,23 +395,29 @@
     </style>
 </head>
 <body>
-    <!-- Header - Estilo global.css -->
     <header class="header">
         <div class="header-content">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <a href="/" class="logo">
                     <span class="logo-auto">Auto</span><span class="logo-max">Max</span>
                 </a>
+                <span class="user-badge">{{ usuario_logado }}</span>
             </div>
             <div class="header-actions">
-                <a href="/admin" class="btn btn-outline">Painel Admin</a>
+                {% if nivel_acesso == '3' %}
+                <a href="/admin/funcionarios" class="btn btn-outline">Funcionários</a>
+                <a href="/admin/clientes" class="btn btn-outline">Clientes</a>
+                {% elif nivel_acesso == '2' %}
+                <a href="/admin/clientes" class="btn btn-outline">Clientes</a>
+                {% endif %}
+                <a href="/admin/ordens" class="btn btn-outline">Ordens</a>
+                <a href="/admin/estoque" class="btn btn-outline">Estoque</a>
                 <a href="/logout" class="btn btn-primary">Sair</a>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-header">
@@ -466,9 +425,8 @@
                         <div class="stat-title">Ordens Abertas</div>
                     </div>
                 </div>
-                <div class="stat-value">24</div>
+                <div cla    ss="stat-value">{{ ordens_abertas }}</div>
                 <div class="stat-label">Ordens de serviço em andamento</div>
-                <span class="stat-trend up">↑ 12% vs. mês passado</span>
             </div>
 
             <div class="stat-card success">
@@ -477,9 +435,8 @@
                         <div class="stat-title">Receita Mensal</div>
                     </div>
                 </div>
-                <div class="stat-value">R$ 45,8K</div>
+                <div class="stat-value">R$ {{ "%.2f"|format(receita_mes_atual/1000) }}K</div>
                 <div class="stat-label">Faturamento de dezembro</div>
-                <span class="stat-trend up">↑ 23% vs. mês passado</span>
             </div>
 
             <div class="stat-card warning">
@@ -488,9 +445,8 @@
                         <div class="stat-title">Produtos Baixo Estoque</div>
                     </div>
                 </div>
-                <div class="stat-value">7</div>
+                <div class="stat-value">{{ produtos_baixo_estoque }}</div>
                 <div class="stat-label">Itens precisam reposição</div>
-                <span class="stat-trend down">Atenção necessária</span>
             </div>
 
             <div class="stat-card info">
@@ -499,22 +455,15 @@
                         <div class="stat-title">Clientes Ativos</div>
                     </div>
                 </div>
-                <div class="stat-value">152</div>
+                <div class="stat-value">{{ clientes_ativos }}</div>
                 <div class="stat-label">Clientes cadastrados</div>
-                <span class="stat-trend up">↑ 8 novos este mês</span>
             </div>
         </div>
 
-        <!-- Charts Section -->
         <div class="charts-section">
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title">Receita por Mês</h3>
-                    <select class="chart-filter">
-                        <option>Últimos 6 meses</option>
-                        <option>Últimos 12 meses</option>
-                        <option>Este ano</option>
-                    </select>
+                    <h3 class="chart-title">Receita por Mês (Últimos 6 meses)</h3>
                 </div>
                 <canvas id="revenueChart"></canvas>
             </div>
@@ -524,44 +473,24 @@
                     <h3 class="chart-title">Atividades Recentes</h3>
                 </div>
                 <ul class="activity-list">
+                    {% for atividade in atividades_recentes %}
                     <li class="activity-item">
                         <div class="activity-content">
-                            <div class="activity-title">Ordem #1245 concluída</div>
-                            <div class="activity-description">Honda Civic - Troca de óleo</div>
+                            <div class="activity-title">Ordem #{{ atividade[0] }}</div>
+                            <div class="activity-description">{{ atividade[1] }} - {{ atividade[2] }}</div>
                         </div>
-                        <div class="activity-time">2h atrás</div>
+                        <div class="activity-time">{{ atividade[3][:10] }}</div>
                     </li>
-                    <li class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">Nova ordem criada</div>
-                            <div class="activity-description">Toyota Corolla - Revisão</div>
-                        </div>
-                        <div class="activity-time">5h atrás</div>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">Estoque baixo</div>
-                            <div class="activity-description">Pastilha de freio - 3 unidades</div>
-                        </div>
-                        <div class="activity-time">1d atrás</div>
-                    </li>
-                    <li class="activity-item">
-                        <div class="activity-content">
-                            <div class="activity-title">Novo cliente</div>
-                            <div class="activity-description">Pedro Santos cadastrado</div>
-                        </div>
-                        <div class="activity-time">2d atrás</div>
-                    </li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>
 
-        <!-- Tables Section -->
         <div class="tables-section">
             <div class="table-card">
                 <div class="table-header">
                     <h3 class="table-title">Ordens Pendentes</h3>
-                    <a href="/admin" class="view-all">Ver todas →</a>
+                    <a href="/admin/ordens" class="view-all">Ver todas →</a>
                 </div>
                 <table>
                     <thead>
@@ -573,30 +502,24 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for ordem in ordens_pendentes %}
                         <tr>
-                            <td>#1248</td>
-                            <td>Maria Silva</td>
-                            <td>Civic 2021</td>
-                            <td><span class="status-badge warning">Em andamento</span></td>
+                            <td>#{{ ordem[0] }}</td>
+                            <td>{{ ordem[1] }}</td>
+                            <td>{{ ordem[2] }} - {{ ordem[3] }}</td>
+                            <td>
+                                {% if ordem[4] == 'EM ANDAMENTO' %}
+                                <span class="status-badge warning">Em andamento</span>
+                                {% elif ordem[4] == 'AGUARDANDO PEÇA' %}
+                                <span class="status-badge info">Aguardando peças</span>
+                                {% elif ordem[4] == 'CONCLUIDO' %}
+                                <span class="status-badge success">Pronto</span>
+                                {% else %}
+                                <span class="status-badge warning">{{ ordem[4] }}</span>
+                                {% endif %}
+                            </td>
                         </tr>
-                        <tr>
-                            <td>#1247</td>
-                            <td>João Santos</td>
-                            <td>Corolla 2020</td>
-                            <td><span class="status-badge info">Aguardando peças</span></td>
-                        </tr>
-                        <tr>
-                            <td>#1246</td>
-                            <td>Ana Costa</td>
-                            <td>Gol 2019</td>
-                            <td><span class="status-badge warning">Em andamento</span></td>
-                        </tr>
-                        <tr>
-                            <td>#1244</td>
-                            <td>Carlos Souza</td>
-                            <td>HB20 2022</td>
-                            <td><span class="status-badge success">Pronto</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -604,7 +527,7 @@
             <div class="table-card">
                 <div class="table-header">
                     <h3 class="table-title">Produtos Baixo Estoque</h3>
-                    <a href="/admin" class="view-all">Ver todos →</a>
+                    <a href="/admin/estoque" class="view-all">Ver todos →</a>
                 </div>
                 <table>
                     <thead>
@@ -615,44 +538,37 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for produto in produtos_estoque %}
                         <tr>
-                            <td>Pastilha de freio</td>
-                            <td class="stock-low">3 un.</td>
-                            <td><span class="status-badge error">Crítico</span></td>
+                            <td>{{ produto[0] }}</td>
+                            <td class="{% if produto[1] < 5 %}stock-low{% else %}stock-ok{% endif %}">
+                                {{ produto[1] }} un.
+                            </td>
+                            <td>
+                                {% if produto[2] == 'Crítico' %}
+                                <span class="status-badge error">Crítico</span>
+                                {% elif produto[2] == 'Baixo' %}
+                                <span class="status-badge warning">Baixo</span>
+                                {% else %}
+                                <span class="status-badge success">Normal</span>
+                                {% endif %}
+                            </td>
                         </tr>
-                        <tr>
-                            <td>Filtro de óleo</td>
-                            <td class="stock-low">8 un.</td>
-                            <td><span class="status-badge warning">Baixo</span></td>
-                        </tr>
-                        <tr>
-                            <td>Lâmpada H4</td>
-                            <td class="stock-low">5 un.</td>
-                            <td><span class="status-badge error">Crítico</span></td>
-                        </tr>
-                        <tr>
-                            <td>Óleo 5W30</td>
-                            <td class="stock-ok">15 un.</td>
-                            <td><span class="status-badge warning">Baixo</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast Container -->
-    <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 350px;"></div>
-
     <script>
-        // ===== CHART.JS - GRÁFICO DE RECEITA =====
         const ctx = document.getElementById('revenueChart').getContext('2d');
         
         const revenueData = {
-            labels: ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            labels: {{ meses|tojson }},
             datasets: [{
                 label: 'Receita (R$)',
-                data: [32000, 28500, 35000, 41000, 37200, 45800],
+                data: {{ receitas|tojson }},
                 backgroundColor: 'rgba(211, 47, 47, 0.1)',
                 borderColor: '#D32F2F',
                 borderWidth: 3,
@@ -718,122 +634,6 @@
         };
 
         const revenueChart = new Chart(ctx, config);
-
-        document.querySelector('.chart-filter').addEventListener('change', function(e) {
-            console.log('Filtro alterado:', e.target.value);
-        });
-
-        // ===== SISTEMA DE NOTIFICAÇÕES =====
-        const notificationContainer = document.getElementById('notificationContainer');
-        
-        function createNotification(type, title, message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                background: white;
-                border-radius: 6px;
-                padding: 16px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                border: 2px solid;
-                display: flex;
-                align-items: flex-start;
-                gap: 12px;
-                animation: slideIn 0.3s ease;
-                cursor: pointer;
-                transition: transform 0.2s ease;
-            `;
-
-            const types = {
-                success: { color: '#4CAF50', icon: '✓', bg: 'rgba(76, 175, 80, 0.1)' },
-                error: { color: '#F44336', icon: '✕', bg: 'rgba(244, 67, 54, 0.1)' },
-                warning: { color: '#FF9800', icon: '⚠️', bg: 'rgba(255, 152, 0, 0.1)' },
-                info: { color: '#2196F3', icon: 'ℹ', bg: 'rgba(33, 150, 243, 0.1)' }
-            };
-
-            const typeConfig = types[type] || types.info;
-            notification.style.borderColor = typeConfig.color;
-
-            notification.innerHTML = `
-                <div style="
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    background: ${typeConfig.bg};
-                    color: ${typeConfig.color};
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 1.2rem;
-                    font-weight: bold;
-                    flex-shrink: 0;
-                ">
-                    ${typeConfig.icon}
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <div style="font-weight: 600; color: #1A1A1A; margin-bottom: 4px;">
-                        ${title}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #757575; line-height: 1.4;">
-                        ${message}
-                    </div>
-                </div>
-                <div style="
-                    color: #757575;
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    padding: 0 4px;
-                    line-height: 1;
-                    flex-shrink: 0;
-                " onclick="this.parentElement.remove()">
-                    ×
-                </div>
-            `;
-
-            notification.addEventListener('mouseenter', () => {
-                notification.style.transform = 'translateX(-4px)';
-            });
-
-            notification.addEventListener('mouseleave', () => {
-                notification.style.transform = 'translateX(0)';
-            });
-
-            notificationContainer.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 5000);
-        }
-
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        setTimeout(() => {
-            createNotification('success', 'Sistema Pronto', 'Dashboard carregado com sucesso!');
-        }, 1000);
-
-        window.showNotification = createNotification;
     </script>
 </body>
 </html>

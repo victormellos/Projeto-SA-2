@@ -1,20 +1,18 @@
-from flask import render_template, request, redirect, session, flash
+from flask import render_template, request, redirect, session, flash, jsonify
 from app import app, get_db
 import bcrypt
 import sqlite3
 import time
-
+from datetime import datetime, timedelta
 
 def home():
     return redirect('/')
 
-def fetchProducts():
+def fetch_products():
     db = get_db()
     cursor = db.cursor()
-    
-    cursor.execute("SELECT * FROM PRODUTOS ORDER BY preco ASC LIMIT 6")
+    cursor.execute("SELECT * FROM produtos ORDER BY preco ASC LIMIT 6")
     results = cursor.fetchall()
-    
     return results
 
 @app.route("/")
@@ -23,7 +21,7 @@ def fetchProducts():
 def index():
     usuario = session.get("usuario")
     tipo = session.get("tipo")
-    produtos = fetchProducts()
+    produtos = fetch_products()
     return render_template('index.html', usuario_logado=usuario, tipo_usuario=tipo, produtos=produtos)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -42,20 +40,21 @@ def login():
             cursor.execute("SELECT nome_cliente FROM clientes WHERE email=?", (log_email,))
             session["usuario"] = cursor.fetchone()[0]
             session["tipo"] = "cliente"
-            session["id_cliente"] = row[0] # id
+            session["id_cliente"] = row[0]
             flash('Login realizado com sucesso!', 'success')
-            return redirect('/login')
+            return redirect('/dashboard')
 
-        cursor.execute("SELECT senha FROM funcionarios WHERE nome_funcionario=?", (log_email,))
+        cursor.execute("SELECT id_funcionario, senha, nivel_de_acesso FROM funcionarios WHERE nome_funcionario=?", (log_email,))
         row = cursor.fetchone()
 
-        if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[0]):
-            cursor.execute("SELECT * FROM funcionarios WHERE nome_funcionario=?", (log_email,))
+        if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[1]):
+            cursor.execute("SELECT nome_funcionario FROM funcionarios WHERE nome_funcionario=?", (log_email,))
             session["usuario"] = cursor.fetchone()[0]
             session["tipo"] = "funcionario"
-            session["id_funcionario"] = row[0] # id
+            session["id_funcionario"] = row[0]
+            session["nivel_acesso"] = row[2]
             flash('Login realizado com sucesso!', 'success')
-            return redirect('/login')
+            return redirect('/dashboard')
 
         flash('Usuário ou senha incorretos', 'error')
         return redirect('/login')
@@ -67,50 +66,65 @@ def logout():
     session.clear()
     return redirect('/login')
 
-@app.route('/admin')
+@app.route('/dashboard')
 def dashboard():
-    # Verifica se o usuário está logado e é funcionário
     if session.get("tipo") != "funcionario":
         flash('Acesso restrito a funcionários', 'error')
         return redirect('/login')
     
     usuario = session.get("usuario")
+    nivel_acesso = session.get("nivel_acesso", "1")
     
     conn = get_db()
     cursor = conn.cursor()
     
-    # Buscar estatísticas do dashboard
     try:
-        # Contagem de ordens de serviço abertas
-        cursor.execute("SELECT COUNT(*) FROM ordens_servico WHERE status IN ('Em andamento', 'Aguardando peças')")
-        ordens_abertas = cursor.fetchone()[0] 
-        if not ordens_abertas:
-            ordens_abertas = 24
+        cursor.execute("SELECT COUNT(*) FROM ordem WHERE status IN ('EM ANDAMENTO', 'AGUARDANDO PEÇA', 'EM ABERTO')")
+        ordens_abertas = cursor.fetchone()[0] or 0
 
-        # Produtos com baixo estoque (menos de 10 unidades)
         cursor.execute("SELECT COUNT(*) FROM produtos WHERE stock < 10")
-        produtos_baixo_estoque = cursor.fetchone()[0]
-        if not produtos_baixo_estoque:
-            produtos_baixo_estoque = 7
+        produtos_baixo_estoque = cursor.fetchone()[0] or 0
 
-        # O total de clientes ativos
         cursor.execute("SELECT COUNT(*) FROM clientes")
-        clientes_ativos = cursor.fetchone()[0]
-        if not clientes_ativos:
-            clientes_ativos = 152
+        clientes_ativos = cursor.fetchone()[0] or 0
+
+        cursor.execute("""
+            SELECT 
+                strftime('%Y-%m', o.abertura) as mes,
+                SUM(o.orcamento) as receita
+            FROM ordem o
+            WHERE o.abertura IS NOT NULL 
+            AND o.abertura >= date('now', '-6 months')
+            GROUP BY strftime('%Y-%m', o.abertura)
+            ORDER BY mes
+        """)
+        receita_mensal = cursor.fetchall()
+
+        meses = []
+        receitas = []
+        for row in receita_mensal:
+            if row[0]:
+                mes_formatado = datetime.strptime(row[0], '%Y-%m').strftime('%b')
+                meses.append(mes_formatado)
+                receitas.append(float(row[1]) if row[1] else 0)
+
+        while len(meses) < 6:
+            meses.insert(0, '')
+            receitas.insert(0, 0)
+
+        receita_mes_atual = receitas[-1] if receitas else 0
 
         cursor.execute("""
             SELECT o.id_ordem, c.nome_cliente, v.modelo, v.placa, o.status 
-            FROM ordens_servico o
+            FROM ordem o
             LEFT JOIN clientes c ON o.id_cliente = c.id_cliente
             LEFT JOIN veiculos v ON o.id_veiculo = v.id_veiculo
-            WHERE o.status != 'Concluída'
-            ORDER BY o.data_abertura DESC
+            WHERE o.status != 'CONCLUIDO'
+            ORDER BY o.abertura DESC
             LIMIT 4
         """)
         ordens_pendentes = cursor.fetchall()
         
-        # aqui são os produtos com baixo estoque eu tava vendo na tabelas de banco de dados e fazendo testes com isso mas n deu mt bom
         cursor.execute("""
             SELECT nome, stock, 
                 CASE 
@@ -124,23 +138,41 @@ def dashboard():
             LIMIT 4
         """)
         produtos_estoque = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT o.id_ordem, c.nome_cliente, o.tipo_ordem, o.abertura
+            FROM ordem o
+            LEFT JOIN clientes c ON o.id_cliente = c.id_cliente
+            ORDER BY o.abertura DESC
+            LIMIT 5
+        """)
+        atividades_recentes = cursor.fetchall()
         
-    except sqlite3.OperationalError:
-        # Testando algumas coisas de tabelas
-        ordens_abertas = 24
-        produtos_baixo_estoque = 7
-        clientes_ativos = 152
+    except sqlite3.Error as e:
+        print(f"Erro no banco: {e}")
+        ordens_abertas = 0
+        produtos_baixo_estoque = 0
+        clientes_ativos = 0
+        meses = ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+        receitas = [32000, 28500, 35000, 41000, 37200, 45800]
+        receita_mes_atual = 45800
         ordens_pendentes = []
         produtos_estoque = []
+        atividades_recentes = []
     
     return render_template(
         'dashboard.html',
         usuario_logado=usuario,
+        nivel_acesso=nivel_acesso,
         ordens_abertas=ordens_abertas,
         produtos_baixo_estoque=produtos_baixo_estoque,
         clientes_ativos=clientes_ativos,
+        receita_mes_atual=receita_mes_atual,
+        meses=meses,
+        receitas=receitas,
         ordens_pendentes=ordens_pendentes,
-        produtos_estoque=produtos_estoque
+        produtos_estoque=produtos_estoque,
+        atividades_recentes=atividades_recentes
     )
 
 @app.route('/cadastro', methods=['GET', 'POST'])
@@ -154,7 +186,6 @@ def cadastro():
 
         conn = get_db()
         cursor = conn.cursor()
-
 
         try:
             cursor.execute("SELECT id_cliente FROM clientes WHERE CPF=?", (cpf,))
@@ -173,14 +204,15 @@ def cadastro():
                 if cursor.fetchone():
                     flash('Placa já cadastrada no sistema!', 'error')
                     return redirect('/cadastro')
+            
             salt = bcrypt.gensalt()
-            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), )
-            senhaasdasdasd = "admin123"
-            print(bcrypt.hashpw(), )
+            senha_hash = bcrypt.hashpw(senha.encode('utf-8'), salt)
+            
             modelo = request.form.get("modelo")
             marca = request.form.get("marca")
             ano = request.form.get("ano")
             cor = request.form.get("cor")
+            
             cursor.execute(
                 "INSERT INTO clientes (nome_cliente, CPF, celular, email, senha) VALUES (?, ?, ?, ?, ?)",
                 (nome, cpf, celular, email, senha_hash)
@@ -227,16 +259,12 @@ def pedir():
     
     id_cliente = session.get("id_cliente")
 
-    cursor.execute("SELECT * FROM CLIENTES WHERE id_cliente = ?", (id_cliente,))    
+    cursor.execute("SELECT * FROM clientes WHERE id_cliente = ?", (id_cliente,))    
     cliente = cursor.fetchone()
     cursor.execute("SELECT id_veiculo, marca, modelo, ano, placa FROM veiculos WHERE id_cliente = ?", (id_cliente,))
     veiculos = cursor.fetchall()
-    print(cliente)
+    
     return render_template('pedir.html', cliente=cliente, veiculos=veiculos)
-
-
-from flask import request, session
-import time
 
 @app.route("/pedir/troca-pecas", methods=["POST"])
 def troca_pecas():
@@ -244,9 +272,8 @@ def troca_pecas():
     cursor = conn.cursor()
     id_cliente = session.get("id_cliente")
     tipo = "Troca de peças"
-    abertura = time.ctime()
+    abertura = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Campos do formulário
     id_veiculo = request.form.get("id_veiculo")
     descricao = request.form.get("descricao")
     observacoes = request.form.get("observacoes")
@@ -256,18 +283,12 @@ def troca_pecas():
         diagnostico += f"\nObservações: {observacoes}"
 
     cursor.execute("""
-        INSERT INTO ordem (id_cliente, id_veiculo, tipo_ordem, diagnostico, abertura)
-        VALUES (?, ?, ?, ?, ?)
-    """, (
-        id_cliente,
-        id_veiculo,
-        tipo,
-        diagnostico,
-        abertura
-    ))
+        INSERT INTO ordem (id_cliente, id_veiculo, tipo_ordem, diagnostico, abertura, status)
+        VALUES (?, ?, ?, ?, ?, 'EM ABERTO')
+    """, (id_cliente, id_veiculo, tipo, diagnostico, abertura))
+    
     conn.commit()
     return render_template("confirma.html")
-
 
 @app.route("/pedir/emergencial", methods=["POST"])
 def emergencial():
@@ -275,9 +296,8 @@ def emergencial():
     cursor = conn.cursor()
     id_cliente = session.get("id_cliente")
     tipo = "Serviço Emergencial"
-    abertura = time.ctime()
+    abertura = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Campos do formulário
     id_veiculo = request.form.get("id_veiculo")
     urgencia = request.form.get("urgencia")
     localizacao = request.form.get("localizacao")
@@ -290,18 +310,12 @@ def emergencial():
         diagnostico += f"\nObservações: {observacoes}"
 
     cursor.execute("""
-        INSERT INTO ordem (id_cliente, id_veiculo, tipo_ordem, diagnostico, abertura)
-        VALUES (?, ?, ?, ?, ?)
-    """, (
-        id_cliente,
-        id_veiculo,
-        tipo,
-        diagnostico,
-        abertura
-    ))
+        INSERT INTO ordem (id_cliente, id_veiculo, tipo_ordem, diagnostico, abertura, status)
+        VALUES (?, ?, ?, ?, ?, 'EM ABERTO')
+    """, (id_cliente, id_veiculo, tipo, diagnostico, abertura))
+    
     conn.commit()
     return render_template("confirma.html")
-
 
 @app.route("/pedir/agendamento", methods=["POST"])
 def agendamento():
@@ -309,9 +323,8 @@ def agendamento():
     cursor = conn.cursor()
     id_cliente = session.get("id_cliente")
     tipo = "Agendamento de Serviço"
-    abertura = time.ctime()
+    abertura = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Campos do formulário
     id_veiculo = request.form.get("id_veiculo")
     tipo_servico = request.form.get("tipo_servico")
     data = request.form.get("data")
@@ -324,14 +337,9 @@ def agendamento():
         diagnostico += f"\nObservações: {observacoes}"
 
     cursor.execute("""
-        INSERT INTO ordem (id_cliente, id_veiculo, tipo_ordem, diagnostico, abertura)
-        VALUES (?, ?, ?, ?, ?)
-    """, (
-        id_cliente,
-        id_veiculo,
-        tipo,
-        diagnostico,
-        abertura
-    ))
+        INSERT INTO ordem (id_cliente, id_veiculo, tipo_ordem, diagnostico, abertura, status)
+        VALUES (?, ?, ?, ?, ?, 'EM ABERTO')
+    """, (id_cliente, id_veiculo, tipo, diagnostico, abertura))
+    
     conn.commit()
     return render_template("confirma.html")

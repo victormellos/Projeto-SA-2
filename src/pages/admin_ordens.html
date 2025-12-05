@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Ordens - Automax</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/dashboard" class="logo">
+                <span class="logo-auto">Auto</span><span class="logo-max">Max</span>
+            </a>
+            <div class="header-actions">
+                <a href="/dashboard" class="btn btn-outline">← Dashboard</a>
+                <a href="/logout" class="btn btn-primary">Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Gerenciar Ordens de Serviço</h1>
+            <p>Visualize e edite ordens de serviço</p>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Veículo</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Data Abertura</th>
+                        <th>Orçamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ordem in ordens %}
+                    <tr>
+                        <td>#{{ ordem[0] }}</td>
+                        <td>{{ ordem[1] }}</td>
+                        <td>{{ ordem[2] }} - {{ ordem[3] }}</td>
+                        <td>{{ ordem[4] }}</td>
+                        <td>
+                            {% if ordem[5] == 'CONCLUIDO' %}
+                            <span class="badge badge-success">{{ ordem[5] }}</span>
+                            {% elif ordem[5] == 'EM ANDAMENTO' %}
+                            <span class="badge badge-warning">{{ ordem[5] }}</span>
+                            {% elif ordem[5] == 'AGUARDANDO PEÇA' %}
+                            <span class="badge badge-info">{{ ordem[5] }}</span>
+                            {% elif ordem[5] == 'CANCELADO' %}
+                            <span class="badge badge-error">{{ ordem[5] }}</span>
+                            {% else %}
+                            <span class="badge badge-default">{{ ordem[5] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ ordem[6][:10] if ordem[6] else '-' }}</td>
+                        <td>R$ {{ "%.2f"|format(ordem[7]) if ordem[7] else '0.00' }}</td>
+                        <td>
+                            <a href="/admin/ordens/editar/{{ ordem[0] }}" class="btn-action btn-edit">Editar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+        :root {
+            --primary: #D32F2F;
+            --primary-dark: #B71C1C;
+            --secondary: #1A1A1A;
+            --background: #FFFFFF;
+            --surface: #F5F5F5;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        .header {
+            background-color: var(--background);
+            border-bottom: 2px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .logo-auto {
+            color: var(--secondary);
+        }
+
+        .logo-max {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-light);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--surface);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover {
+            background-color: var(--surface);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-error {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+        }
+
+        .badge-info {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196F3;
+        }
+
+        .badge-default {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text);
+        }
+
+        .btn-action {
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-edit {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+    </style>
+</body>
+</html>

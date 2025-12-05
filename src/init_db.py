@@ -1,4 +1,7 @@
 import sqlite3
+import bcrypt
+from datetime import datetime, timedelta
+import random
 
 conn = sqlite3.connect('automax.db')
 cursor = conn.cursor() 
@@ -57,17 +60,10 @@ def init_database():
         conclusao_ordem TEXT,
         mao_de_obra REAL,
         orcamento REAL,
-        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE,
+        status TEXT DEFAULT 'EM ABERTO',
+        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE SET NULL,
         FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE,
         FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS logs_fun(
-        id_logs_fun INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_func INTEGER,
-        id_log INTEGER,
-        FOREIGN KEY (id_func) REFERENCES funcionarios(id_funcionario) ON DELETE SET NULL
-        FOREIGN KEY (id_log) REFERENCES logs(id_log) ON DELETE SET NULL
     );
 
     CREATE TABLE IF NOT EXISTS logs (
@@ -76,6 +72,14 @@ def init_database():
         detalhe TEXT,
         momento_acao TEXT,
         FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS logs_fun(
+        id_logs_fun INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_func INTEGER,
+        id_log INTEGER,
+        FOREIGN KEY (id_func) REFERENCES funcionarios(id_funcionario) ON DELETE SET NULL,
+        FOREIGN KEY (id_log) REFERENCES logs(id_log) ON DELETE SET NULL
     );
 
     CREATE TABLE IF NOT EXISTS funcionario_ordems (
@@ -124,76 +128,15 @@ def init_database():
 
     conn.commit()
 
-def Inserir_dados():
-    veiculos = [
-        ('Toyota', 'Preto', '2020', 'Corolla', 'ABC-1234'),
-        ('Honda', 'Branco', '2021', 'Civic', 'XYZ-5678'),
-    ]
-    cursor.executemany(''' 
-        INSERT INTO veiculos (marca, cor, ano, modelo, placa)
-        VALUES (?, ?, ?, ?, ?)
-    ''', veiculos)
-
-    produtos = [
-    (
-        'Óleo de motor',
-        50,
-        100,
-        'https://www.profiautos.com.br/novosite/wp-content/uploads/2017/05/TROCA-DE-600x400.jpg',
-        'Pecas',
-        'Óleo para motores de carros, ideal para troca de óleo.'
-    ),
-    (
-        'Filtro de ar',
-        30,
-        200,
-        'https://images.cws.digital/produtos/gg/34/51/filtro-de-ar-10075134-1675716012938.jpg',
-        'Pecas',
-        'Filtro de ar para manter o motor livre de impurezas.'
-    ),
-    (
-        'Pastilha de freio',
-        70,
-        150,
-        'https://www.horuspecas.com.br/media/catalog/product/cache/1/image/600x400.8/9df78eab33525d08d6e5fb8d27136e95/1/2/1272.jpg',
-        'Pecas',
-        'Pastilhas de freio de alta performance, seguras e duráveis.'
-    ),
-    (
-        'Pneu 205/55',
-        350,
-        120,
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQM1y3yHoBYkHV8xShhgFzkGqAvNVpFpIHQdQ&s',
-        'Pecas',
-        'Pneu de alta resistência para carros de passeio.'
-    ),
-    (
-        'Bateria 60Ah',
-        200,
-        80,
-        'https://cdn.awsli.com.br/2500x2500/515/515778/produto/19478716/9aea91eed0.jpg',
-        'Pecas',
-        'Bateria automotiva de 60Ah, ideal para carros populares.'
-    ),
-    (
-        'Amortecedor',
-        150,
-        60,
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKySigx4BgpFP6KlqUzyHRuPy0YQDwoMvUGg&s',
-        'Pecas',
-        'Amortecedor para melhorar a suspensão do veículo.'
-    ),
-    ]
-
+def inserir_dados():
+    senha_padrao = bcrypt.hashpw('admin123'.encode('utf-8'), bcrypt.gensalt())
     
-    cursor.executemany(''' 
-        INSERT INTO produtos (nome, preco, stock, imagem, categoria, detalhes)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', produtos)
-
     clientes = [
-        ('João Silva', '123.456.789-00', '123456789', 'joao@email.com', '$2a$12$pYP4kAD2vLNv4zjeksgvae0KdACRpI7CN08/fq.wB6DtoMCEKwbf6'.encode("utf-8")),
-        ('Maria Oliveira', '987.654.321-00', '987654321', 'maria@email.com', '$2a$12$pYP4kAD2vLNv4zjeksgvae0KdACRpI7CN08/fq.wB6DtoMCEKwbf6'.encode("utf-8")),
+        ('João Silva', '123.456.789-00', '47988887777', 'joao@email.com', senha_padrao),
+        ('Maria Oliveira', '987.654.321-00', '47977776666', 'maria@email.com', senha_padrao),
+        ('Pedro Santos', '111.222.333-44', '47966665555', 'pedro@email.com', senha_padrao),
+        ('Ana Costa', '555.666.777-88', '47955554444', 'ana@email.com', senha_padrao),
+        ('Carlos Souza', '999.888.777-66', '47944443333', 'carlos@email.com', senha_padrao),
     ]
     
     cursor.executemany(''' 
@@ -201,10 +144,39 @@ def Inserir_dados():
         VALUES (?, ?, ?, ?, ?)
     ''', clientes)
 
+    veiculos = [
+        ('Toyota', 'Preto', '2020', 'Corolla', 'ABC-1234', 1),
+        ('Honda', 'Branco', '2021', 'Civic', 'XYZ-5678', 2),
+        ('Volkswagen', 'Prata', '2019', 'Gol', 'DEF-9012', 3),
+        ('Hyundai', 'Vermelho', '2022', 'HB20', 'GHI-3456', 4),
+        ('Chevrolet', 'Azul', '2020', 'Onix', 'JKL-7890', 5),
+    ]
+    
+    cursor.executemany(''' 
+        INSERT INTO veiculos (marca, cor, ano, modelo, placa, id_cliente)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', veiculos)
+
+    produtos = [
+        ('Óleo de motor', 50, 100, 'https://www.profiautos.com.br/novosite/wp-content/uploads/2017/05/TROCA-DE-600x400.jpg', 'Pecas', 'Óleo para motores de carros, ideal para troca de óleo.'),
+        ('Filtro de ar', 30, 200, 'https://images.cws.digital/produtos/gg/34/51/filtro-de-ar-10075134-1675716012938.jpg', 'Pecas', 'Filtro de ar para manter o motor livre de impurezas.'),
+        ('Pastilha de freio', 70, 3, 'https://www.horuspecas.com.br/media/catalog/product/cache/1/image/600x400.8/9df78eab33525d08d6e5fb8d27136e95/1/2/1272.jpg', 'Pecas', 'Pastilhas de freio de alta performance, seguras e duráveis.'),
+        ('Pneu 205/55', 350, 120, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQM1y3yHoBYkHV8xShhgFzkGqAvNVpFpIHQdQ&s', 'Pecas', 'Pneu de alta resistência para carros de passeio.'),
+        ('Bateria 60Ah', 200, 80, 'https://cdn.awsli.com.br/2500x2500/515/515778/produto/19478716/9aea91eed0.jpg', 'Pecas', 'Bateria automotiva de 60Ah, ideal para carros populares.'),
+        ('Amortecedor', 150, 60, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKySigx4BgpFP6KlqUzyHRuPy0YQDwoMvUGg&s', 'Pecas', 'Amortecedor para melhorar a suspensão do veículo.'),
+        ('Vela de ignição', 25, 8, 'https://example.com/vela.jpg', 'Pecas', 'Velas de ignição originais.'),
+        ('Lâmpada H4', 15, 5, 'https://example.com/lampada.jpg', 'Pecas', 'Lâmpadas para faróis.'),
+    ]
+    
+    cursor.executemany(''' 
+        INSERT INTO produtos (nome, preco, stock, imagem, categoria, detalhes)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', produtos)
+
     funcionarios = [
-        ('$2a$12$GDvXuhxPgDCeVHxNSDuEiOLB/sS4DLhnN7b80PlUSCeJtGNz/NXb6'.encode("UTF-8"), 'Carlos Mendes', '3'),
-        ('$2a$12$BeKxQu2T1M7SdWDNCtvdN.7ButNJTX1gUsGhRBz7fiJl1lqfHcClS'.encode("UTF-8"), 'Roberto Santos', '2'),
-        ('$2a$12$CpGfc6d35zl.f/VcykquV.eKQKS5wrqSUuXbGWYarVjzQ1YcIkVMe'.encode("UTF-8"), 'Ana Costa', '1')
+        (bcrypt.hashpw('gerente123'.encode('utf-8'), bcrypt.gensalt()), 'Carlos Mendes', '3'),
+        (bcrypt.hashpw('recepcao123'.encode('utf-8'), bcrypt.gensalt()), 'Roberto Santos', '2'),
+        (bcrypt.hashpw('mecanico123'.encode('utf-8'), bcrypt.gensalt()), 'Ana Costa', '1')
     ]
     
     cursor.executemany(''' 
@@ -212,9 +184,63 @@ def Inserir_dados():
         VALUES (?, ?, ?)
     ''', funcionarios)
 
+    base_date = datetime.now()
+    status_opcoes = ['EM ABERTO', 'EM ANDAMENTO', 'AGUARDANDO PEÇA', 'CONCLUIDO', 'CANCELADO']
+    tipos_ordem = ['Revisão', 'Troca de peças', 'Serviço Emergencial', 'Agendamento de Serviço']
+    
+    ordens = []
+    for i in range(30):
+        dias_atras = random.randint(0, 180)
+        data_abertura = (base_date - timedelta(days=dias_atras)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        id_cliente = random.randint(1, 5)
+        id_veiculo = id_cliente
+        id_funcionario = random.randint(1, 3)
+        tipo_ordem = random.choice(tipos_ordem)
+        diagnostico = f'Diagnóstico da ordem {i+1}: {tipo_ordem}'
+        status = random.choice(status_opcoes)
+        mao_obra = round(random.uniform(100, 500), 2)
+        orcamento = round(random.uniform(200, 2000), 2)
+        
+        ordens.append((
+            id_funcionario, id_cliente, id_veiculo, tipo_ordem,
+            diagnostico, data_abertura, None, None, None,
+            mao_obra, orcamento, status
+        ))
+    
+    cursor.executemany(''' 
+        INSERT INTO ordem (id_funcionario, id_cliente, id_veiculo, tipo_ordem, 
+                          diagnostico, abertura, prazo, fechamento, conclusao_ordem,
+                          mao_de_obra, orcamento, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', ordens)
+
+    logs = []
+    for i in range(20):
+        id_funcionario = random.randint(1, 3)
+        dias_atras = random.randint(0, 30)
+        momento = (base_date - timedelta(days=dias_atras)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        acoes = [
+            'Criou nova ordem de serviço',
+            'Atualizou status de ordem',
+            'Modificou dados de cliente',
+            'Adicionou peça ao estoque',
+            'Finalizou ordem de serviço'
+        ]
+        
+        detalhe = random.choice(acoes)
+        logs.append((id_funcionario, detalhe, momento))
+    
+    cursor.executemany('''
+        INSERT INTO logs (id_funcionario, detalhe, momento_acao)
+        VALUES (?, ?, ?)
+    ''', logs)
+
     conn.commit()
     conn.close()
+    print("Banco de dados inicializado com sucesso!")
 
 if __name__ == '__main__':
     init_database()
-    Inserir_dados()
+    inserir_dados()
