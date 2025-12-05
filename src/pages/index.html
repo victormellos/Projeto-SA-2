@@ -210,7 +210,7 @@
             {% for i in range(0,6) %}
 
             <div class="product-card">
-                <img src="https://placehold.co/600x400" alt="Filtro de Óleo" class="product-image">
+                <img src="{{produtos[i].imagem}}" alt="Filtro de Óleo" class="product-image">
                 <div class="product-content">
                     <span class="product-category">{{produtos[i].categoria}}</span>
                     <h3 class="product-title">{{produtos[i].nome}}</h3>
