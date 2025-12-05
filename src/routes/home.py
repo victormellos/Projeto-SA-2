@@ -46,6 +46,17 @@ def login():
             flash('Login realizado com sucesso!', 'success')
             return redirect('/login')
 
+        cursor.execute("SELECT senha FROM funcionarios WHERE nome_funcionario=?", (log_email,))
+        row = cursor.fetchone()
+
+        if row and bcrypt.checkpw(log_senha.encode('utf-8'), row[0]):
+            cursor.execute("SELECT * FROM funcionarios WHERE nome_funcionario=?", (log_email,))
+            session["usuario"] = cursor.fetchone()[0]
+            session["tipo"] = "funcionario"
+            session["id_funcionario"] = row[0] # id
+            flash('Login realizado com sucesso!', 'success')
+            return redirect('/login')
+
         flash('Usuário ou senha incorretos', 'error')
         return redirect('/login')
 
@@ -57,31 +68,6 @@ def logout():
     return redirect('/login')
 
 @app.route('/admin')
-def admin():
-    if session.get("tipo") != "funcionario":
-        if session.get("tipo") == "cliente":
-            return redirect('/')
-        return redirect('/login')
-
-    usuario = session.get("usuario")
-
-    conn = get_db()
-    produtos = conn.execute(
-        "SELECT id_produto, nome, preco, stock FROM produtos ORDER BY nome"
-    ).fetchall()
-
-    clientes = conn.execute(
-        "SELECT id_cliente, nome_cliente, email, CPF FROM clientes ORDER BY nome_cliente"
-    ).fetchall()
-
-    return render_template(
-        'admin.html',
-        usuario_logado=usuario,
-        produtos=produtos,
-        clientes=clientes
-    )
-
-@app.route('/dashboard')
 def dashboard():
     # Verifica se o usuário está logado e é funcionário
     if session.get("tipo") != "funcionario":
