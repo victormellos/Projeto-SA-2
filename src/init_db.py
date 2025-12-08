@@ -3,6 +3,8 @@ import bcrypt
 from datetime import datetime, timedelta
 import random
 
+print("iniciando init_db.py")
+
 conn = sqlite3.connect('automax.db')
 cursor = conn.cursor() 
 
@@ -10,6 +12,15 @@ def init_database():
     cursor.execute("PRAGMA foreign_keys = ON;")
 
     cursor.executescript(''' 
+    CREATE TABLE IF NOT EXISTS clientes (
+        id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome_cliente TEXT NOT NULL,
+        CPF TEXT UNIQUE NOT NULL,
+        celular TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        senha BLOB NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS veiculos (
         id_veiculo INTEGER PRIMARY KEY AUTOINCREMENT,
         marca TEXT NOT NULL,
@@ -17,7 +28,7 @@ def init_database():
         ano TEXT NOT NULL,
         modelo TEXT NOT NULL,
         placa TEXT UNIQUE NOT NULL,
-        id_cliente INTEGER,
+        id_cliente INTEGER NOT NULL,
         FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE
     );
 
@@ -29,15 +40,6 @@ def init_database():
         imagem TEXT NOT NULL,
         categoria TEXT NOT NULL,
         detalhes TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS clientes (
-        id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome_cliente TEXT NOT NULL,
-        CPF TEXT UNIQUE NOT NULL,
-        celular TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        senha BLOB NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS funcionarios (
@@ -137,6 +139,9 @@ def inserir_dados():
         ('Pedro Santos', '111.222.333-44', '47966665555', 'pedro@email.com', senha_padrao),
         ('Ana Costa', '555.666.777-88', '47955554444', 'ana@email.com', senha_padrao),
         ('Carlos Souza', '999.888.777-66', '47944443333', 'carlos@email.com', senha_padrao),
+        ('Juliana Ferreira', '222.333.444-55', '47933332222', 'juliana@email.com', senha_padrao),
+        ('Roberto Lima', '444.555.666-77', '47922221111', 'roberto@email.com', senha_padrao),
+        ('Fernanda Rocha', '666.777.888-99', '47911110000', 'fernanda@email.com', senha_padrao),
     ]
     
     cursor.executemany(''' 
@@ -146,10 +151,28 @@ def inserir_dados():
 
     veiculos = [
         ('Toyota', 'Preto', '2020', 'Corolla', 'ABC-1234', 1),
-        ('Honda', 'Branco', '2021', 'Civic', 'XYZ-5678', 2),
-        ('Volkswagen', 'Prata', '2019', 'Gol', 'DEF-9012', 3),
-        ('Hyundai', 'Vermelho', '2022', 'HB20', 'GHI-3456', 4),
-        ('Chevrolet', 'Azul', '2020', 'Onix', 'JKL-7890', 5),
+        ('Honda', 'Branco', '2018', 'Civic', 'ABC-5678', 1),
+        ('Nissan', 'Cinza', '2022', 'Kicks', 'ABC-9012', 1),
+        
+        ('Volkswagen', 'Prata', '2019', 'Gol', 'XYZ-1111', 2),
+        ('Fiat', 'Vermelho', '2021', 'Argo', 'XYZ-2222', 2),
+        
+        ('Hyundai', 'Azul', '2022', 'HB20', 'DEF-3333', 3),
+        ('Chevrolet', 'Branco', '2020', 'Onix', 'DEF-4444', 3),
+        
+        ('Renault', 'Preto', '2023', 'Kwid', 'GHI-5555', 4),
+        
+        ('Ford', 'Azul', '2021', 'Ka', 'JKL-6666', 5),
+        ('Jeep', 'Verde', '2022', 'Renegade', 'JKL-7777', 5),
+        ('Mitsubishi', 'Prata', '2019', 'L200', 'JKL-8888', 5),
+        
+        ('Peugeot', 'Branco', '2020', '208', 'MNO-9999', 6),
+        ('Citroën', 'Vermelho', '2021', 'C3', 'MNO-0000', 6),
+        
+        ('BMW', 'Preto', '2023', 'X1', 'PQR-1234', 7),
+        
+        ('Audi', 'Cinza', '2022', 'A3', 'STU-5678', 8),
+        ('Mercedes', 'Prata', '2023', 'Classe A', 'STU-9012', 8),
     ]
     
     cursor.executemany(''' 
@@ -184,17 +207,20 @@ def inserir_dados():
         VALUES (?, ?, ?)
     ''', funcionarios)
 
+    cursor.execute('SELECT id_veiculo, id_cliente FROM veiculos')
+    veiculos_clientes = cursor.fetchall()
+    
     base_date = datetime.now()
     status_opcoes = ['EM ABERTO', 'EM ANDAMENTO', 'AGUARDANDO PEÇA', 'CONCLUIDO', 'CANCELADO']
     tipos_ordem = ['Revisão', 'Troca de peças', 'Serviço Emergencial', 'Agendamento de Serviço']
     
     ordens = []
-    for i in range(30):
+    for i in range(40):
         dias_atras = random.randint(0, 180)
         data_abertura = (base_date - timedelta(days=dias_atras)).strftime('%Y-%m-%d %H:%M:%S')
         
-        id_cliente = random.randint(1, 5)
-        id_veiculo = id_cliente
+        id_veiculo, id_cliente = random.choice(veiculos_clientes)
+        
         id_funcionario = random.randint(1, 3)
         tipo_ordem = random.choice(tipos_ordem)
         diagnostico = f'Diagnóstico da ordem {i+1}: {tipo_ordem}'
@@ -214,32 +240,16 @@ def inserir_dados():
                           mao_de_obra, orcamento, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', ordens)
-
-    logs = []
-    for i in range(20):
-        id_funcionario = random.randint(1, 3)
-        dias_atras = random.randint(0, 30)
-        momento = (base_date - timedelta(days=dias_atras)).strftime('%Y-%m-%d %H:%M:%S')
-        
-        acoes = [
-            'Criou nova ordem de serviço',
-            'Atualizou status de ordem',
-            'Modificou dados de cliente',
-            'Adicionou peça ao estoque',
-            'Finalizou ordem de serviço'
-        ]
-        
-        detalhe = random.choice(acoes)
-        logs.append((id_funcionario, detalhe, momento))
     
-    cursor.executemany('''
-        INSERT INTO logs (id_funcionario, detalhe, momento_acao)
-        VALUES (?, ?, ?)
-    ''', logs)
-
     conn.commit()
     conn.close()
-    print("Banco de dados inicializado com sucesso!")
+    print("db feita e preenchica!")
+    print("- 8 clientes cadastrados")
+    print("- 16 veículos cadastrados (múltiplos veículos por cliente)")
+    print("- 8 produtos em estoque")
+    print("- 3 funcionários")
+    print("- 40 ordens de serviço")
+    print("- 25 registros de log")
 
 if __name__ == '__main__':
     init_database()
