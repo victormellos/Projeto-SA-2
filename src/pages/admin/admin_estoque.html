@@ -24,6 +24,10 @@
             <p>Visualize e atualize o estoque de produtos</p>
         </div>
 
+        <div style="margin: 1rem 0;">
+            <a href="/admin/adicionar/estoque" class="btn btn-primary">+ Criar Peça</a>
+        </div>
+
         <div class="table-container">
             <table class="data-table">
                 <thead>
@@ -49,15 +53,16 @@
                         <td>{{ produto[4] }}</td>
                         <td>
                             {% if produto[3] < 5 %}
-                            <span class="badge badge-error">Crítico</span>
+                                <span class="badge badge-error">Crítico</span>
                             {% elif produto[3] < 10 %}
-                            <span class="badge badge-warning">Baixo</span>
+                                <span class="badge badge-warning">Baixo</span>
                             {% else %}
-                            <span class="badge badge-success">Normal</span>
+                                <span class="badge badge-success">Normal</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="/admin/estoque/editar/{{ produto[0] }}" class="btn-action btn-edit">Editar</a>
+                            <a href="/admin/editar/estoque/{{ produto[0] }}" class="btn-action btn-edit">Editar</a>
+                            <a href="/admin/deletar/estoque/{{ produto[0] }}" class="btn-action btn-delete" onclick="return confirm('Tem certeza que deseja deletar este produto?');">Deletar</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -116,13 +121,8 @@
             text-transform: uppercase;
         }
 
-        .logo-auto {
-            color: var(--secondary);
-        }
-
-        .logo-max {
-            color: var(--primary);
-        }
+        .logo-auto { color: var(--secondary); }
+        .logo-max { color: var(--primary); }
 
         .header-actions {
             display: flex;
@@ -216,20 +216,9 @@
             background-color: var(--surface);
         }
 
-        .stock-critical {
-            color: var(--error);
-            font-weight: 700;
-        }
-
-        .stock-low {
-            color: var(--warning);
-            font-weight: 700;
-        }
-
-        .stock-ok {
-            color: var(--success);
-            font-weight: 600;
-        }
+        .stock-critical { color: var(--error); font-weight: 700; }
+        .stock-low { color: var(--warning); font-weight: 700; }
+        .stock-ok { color: var(--success); font-weight: 600; }
 
         .badge {
             display: inline-block;
@@ -239,20 +228,9 @@
             font-weight: 600;
         }
 
-        .badge-success {
-            background: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-        }
-
-        .badge-warning {
-            background: rgba(255, 152, 0, 0.1);
-            color: var(--warning);
-        }
-
-        .badge-error {
-            background: rgba(244, 67, 54, 0.1);
-            color: var(--error);
-        }
+        .badge-success { background: rgba(76,175,80,0.1); color: var(--success); }
+        .badge-warning { background: rgba(255,152,0,0.1); color: var(--warning); }
+        .badge-error   { background: rgba(244,67,54,0.1); color: var(--error); }
 
         .btn-action {
             padding: 0.4rem 1rem;
@@ -261,7 +239,6 @@
             font-size: 0.85rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            display: inline-block;
         }
 
         .btn-edit {
@@ -271,6 +248,16 @@
 
         .btn-edit:hover {
             background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #C62828;
             transform: translateY(-2px);
         }
     </style>

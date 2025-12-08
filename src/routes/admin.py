@@ -443,3 +443,128 @@ def excluir_cliente(id_cliente):
     conn.commit()
 
     return redirect("/admin/clientes")
+
+
+@app.route('/admin/adicionar/estoque', methods=['GET', 'POST'])
+def adicionar_produto():
+    if session.get("tipo") != "funcionario":
+        flash("Acesso restrito", "error")
+        return redirect("/auth/login")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        nome = request.form.get("nome_peca")
+        quantidade = request.form.get("quantidade")
+        tipo = request.form.get("tipo")
+        fornecedor = request.form.get("id_fornecedor")
+
+        cursor.execute("""
+            INSERT INTO pecas (nome_peca, quantidade, tipo, id_fornecedor)
+            VALUES (?, ?, ?, ?)
+        """, (nome, quantidade, tipo, fornecedor))
+        conn.commit()
+
+        flash("Peça cadastrada com sucesso!", "success")
+        return redirect("/admin/pecas")
+
+    cursor.execute("SELECT * FROM fornecedores")
+    fornecedores = cursor.fetchall()
+
+    return render_template(
+        "admin/adicionar_produto.html",
+        fornecedores=fornecedores,
+        usuario_logado=session.get("usuario")
+    )
+
+@app.route('/admin/deletar/estoque/<int:id_produto>')
+def deletar_produto(id_produto):
+    if session.get("tipo") != "funcionario":
+        return redirect("/auth/login")
+
+    if session.get("nivel_acesso") not in ["3"]:
+        flash("Apenas gerentes podem excluir produtos", "error")
+        return redirect("/dashboard")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM produtos WHERE id_produto = ?", (id_produto,))
+    conn.commit()
+
+    print(f"[LOG] Produto deletado: ID {id_produto}")
+
+    flash("Produto removido com sucesso!", "success")
+    return redirect("/admin/estoque")
+
+
+@app.route('/admin/adicionar/peca', methods=['GET', 'POST'])
+def adicionar_peca():
+    if session.get("tipo") != "funcionario":
+        flash("Acesso restrito a funcionários", "error")
+        return redirect("/auth/login")
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    if request.method == "POST":
+        nome_peca = request.form.get("nome_peca")
+        quantidade = request.form.get("quantidade")
+        tipo = request.form.get("tipo")
+        cnpj_fornecedor = request.form.get("cnpj_fornecedor")
+        
+        cnpj_limpo = cnpj_fornecedor.replace('.', '').replace('/', '').replace('-', '')
+        
+        cursor.execute("SELECT id_fornecedor FROM fornecedores WHERE cnpj = ?", (cnpj_limpo,))
+        fornecedor = cursor.fetchone()
+        
+        if fornecedor:
+            id_fornecedor = fornecedor[0]
+        else:
+            nome_fornecedor = f"Fornecedor CNPJ: {cnpj_fornecedor}"
+            cursor.execute(
+                "INSERT INTO fornecedores (nome_fornecedor, cnpj) VALUES (?, ?)",
+                (nome_fornecedor, cnpj_limpo)
+            )
+            conn.commit()
+            id_fornecedor = cursor.lastrowid
+        
+        cursor.execute("""
+            INSERT INTO pecas (nome_peca, quantidade, tipo, id_fornecedor)
+            VALUES (?, ?, ?, ?)
+        """, (nome_peca, quantidade, tipo, id_fornecedor))
+    
+        cursor.execute("""
+            INSERT INTO produtos (nome, preco, stock, imagem, categoria, detalhes)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            nome_peca,
+            0.00, 
+            quantidade,
+            '', 
+            'Pecas',
+            f'Peça: {tipo if tipo else "Sem tipo especificado"} | Fornecedor: {nome_fornecedor}'
+        ))
+        
+        conn.commit()
+        
+        id_funcionario = session.get("id_funcionario")
+        momento = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute("""
+            INSERT INTO logs (id_funcionario, detalhe, momento_acao)
+            VALUES (?, ?, ?)
+        """, (id_funcionario, f'Adicionou peça: {nome_peca} (estoque: {quantidade})', momento))
+        conn.commit()
+        
+        flash("Peça cadastrada com sucesso no estoque!", "success")
+        return redirect("/admin/estoque")
+    
+    cursor.execute("SELECT * FROM fornecedores")
+    fornecedores = cursor.fetchall()
+    
+    return render_template(
+        "admin/adicionar_peca.html",
+        fornecedores=fornecedores,
+        usuario_logado=session.get("usuario")
+    )
