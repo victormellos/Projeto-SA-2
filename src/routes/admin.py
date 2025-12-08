@@ -365,3 +365,81 @@ def deletar_funcionario(id_funcionario):
     conn.commit()
 
     return redirect("/admin/funcionarios")
+
+@app.route("/admin/adicionar/cliente", methods=["GET", "POST"])
+def admin_clientes_adicionar():
+    if session.get("tipo") != "funcionario":
+        flash("Acesso restrito a funcionários", "error")
+        return redirect("/auth/login")
+
+    nivel = session.get("nivel_acesso", "1")
+    if nivel not in ["2", "3"]:
+        flash("Acesso negado", "error")
+        return redirect("/dashboard")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        nome = request.form.get("nome")
+        cpf = request.form.get("cpf")
+        celular = request.form.get("celular")
+        email = request.form.get("email")
+
+        senha = request.form.get("senha")  
+
+        if not senha:
+            flash("A senha é obrigatória!", "error")
+            return redirect("/admin/adicionar/cliente")
+        
+
+        senha_hash = bcrypt.hashpw(senha.encode("utf-8"), bcrypt.gensalt())
+
+        placa = request.form.get("placa")
+        modelo = request.form.get("modelo")
+        marca = request.form.get("marca")
+        ano = request.form.get("ano")
+        cor = request.form.get("cor")
+
+        cursor.execute("""
+            INSERT INTO clientes (nome_cliente, CPF, celular, email, senha) 
+            VALUES (?, ?, ?, ?, ?)
+        """, (nome, cpf, celular, email, senha_hash))
+        conn.commit()
+
+        id_cliente = cursor.lastrowid
+
+        if placa or modelo:
+            cursor.execute("""
+                INSERT INTO veiculos (id_cliente, placa, modelo, marca, ano, cor) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (id_cliente, placa, modelo, marca, ano, cor))
+            conn.commit()
+
+        flash("Cliente cadastrado com sucesso!", "success")
+        return redirect("/admin/clientes")
+
+    return render_template(
+        "admin/adicionar_cliente.html",
+        nivel_acesso=nivel,
+        usuario_logado=session.get("usuario")
+    )
+
+    print(f"[LOG] Cliente cadastrado: {nome} | CPF: {cpf} | ID: {id_cliente}")
+
+
+@app.route("/admin/excluir/cliente/<int:id_cliente>")
+def excluir_cliente(id_cliente):
+    if session.get("tipo") != "funcionario":
+        return redirect("/auth/login")
+
+    if session.get("nivel_acesso") not in ["2", "3"]:
+        return redirect("/dashboard")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM clientes WHERE id_cliente = ?", (id_cliente,))
+    conn.commit()
+
+    return redirect("/admin/clientes")

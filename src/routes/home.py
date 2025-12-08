@@ -164,7 +164,7 @@ def login():
             session["id_funcionario"] = row[0]
             session["nivel_acesso"] = row[2]
             flash('Login realizado com sucesso!', 'success')
-            return redirect('/admin/admin')
+            return redirect('/admin')
 
         flash('Usuário ou senha incorretos', 'error')
         return redirect('/auth/login')

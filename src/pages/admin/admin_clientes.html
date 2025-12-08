@@ -8,11 +8,11 @@
 <body>
     <header class="header">
         <div class="header-content">
-            <a href="/admin/admin" class="logo">
+            <a href="/admin" class="logo">
                 <span class="logo-auto">Auto</span><span class="logo-max">Max</span>
             </a>
             <div class="header-actions">
-                <a href="/admin/admin" class="btn btn-outline">← Dashboard</a>
+                <a href="/admin" class="btn btn-outline">← Dashboard</a>
                 <a href="/logout" class="btn btn-primary">Sair</a>
             </div>
         </div>
@@ -21,7 +21,11 @@
     <div class="container">
         <div class="page-header">
             <h1>Gerenciar Clientes</h1>
-            <p>Visualize e edite informações de clientes</p>
+            <p>Visualize, adicione e edite informações de clientes</p>
+
+            <div style="margin-top: 1rem;">
+                <a href="/admin/adicionar/cliente" class="btn btn-primary">+ Adicionar Cliente</a>
+            </div>
         </div>
 
         <div class="table-container">
@@ -47,7 +51,11 @@
                         <td>{{ cliente[4] }}</td>
                         <td>{{ cliente[5] if cliente[5] else 'Nenhum' }}</td>
                         <td>
-                            <a href="/admin/clientes/editar/{{ cliente[0] }}" class="btn-action btn-edit">Editar</a>
+                            <a href="/admin/editar/cliente/{{ cliente[0] }}" class="btn-action btn-edit">Editar</a>
+                            <a href="/admin/excluir/cliente/{{ cliente[0] }}" class="btn-action btn-del" 
+                               onclick="return confirm('Tem certeza que deseja excluir este cliente?');">
+                               Excluir
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -68,11 +76,7 @@
             --border: #E0E0E0;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -103,28 +107,19 @@
             text-transform: uppercase;
         }
 
-        .logo-auto {
-            color: var(--secondary);
-        }
+        .logo-auto { color: var(--secondary); }
+        .logo-max { color: var(--primary); }
 
-        .logo-max {
-            color: var(--primary);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
+        .header-actions { display: flex; gap: 1rem; }
 
         .btn {
             padding: 0.6rem 1.5rem;
             border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: 0.25s;
             border: 2px solid transparent;
             cursor: pointer;
-            font-size: 0.95rem;
         }
 
         .btn-outline {
@@ -148,25 +143,16 @@
             background-color: var(--primary-dark);
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
 
-        .page-header {
-            margin-bottom: 2rem;
-        }
-
+        .page-header { margin-bottom: 2rem; }
         .page-header h1 {
             font-size: 2rem;
             color: var(--secondary);
             margin-bottom: 0.5rem;
         }
 
-        .page-header p {
-            color: var(--text-light);
-        }
+        .page-header p { color: var(--text-light); }
 
         .table-container {
             background: white;
@@ -176,10 +162,7 @@
             overflow-x: auto;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .data-table { width: 100%; border-collapse: collapse; }
 
         .data-table th {
             text-align: left;
@@ -189,7 +172,6 @@
             font-weight: 600;
             color: var(--text-light);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             border-bottom: 2px solid var(--border);
         }
 
@@ -199,9 +181,7 @@
             font-size: 0.9rem;
         }
 
-        .data-table tr:hover {
-            background-color: var(--surface);
-        }
+        .data-table tr:hover { background-color: var(--surface); }
 
         .btn-action {
             padding: 0.4rem 1rem;
@@ -209,19 +189,16 @@
             text-decoration: none;
             font-size: 0.85rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: 0.25s;
             display: inline-block;
+            margin-right: 0.5rem;
         }
 
-        .btn-edit {
-            background: var(--primary);
-            color: white;
-        }
+        .btn-edit { background: var(--primary); color: white; }
+        .btn-edit:hover { background: var(--primary-dark); }
 
-        .btn-edit:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
+        .btn-del { background: #444; color: white; }
+        .btn-del:hover { background: #222; }
     </style>
 </body>
 </html>
